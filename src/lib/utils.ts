@@ -94,8 +94,7 @@ export async function getVideoResolutionFromM3u8(m3u8Url: string): Promise<{ qua
     const m3u8Content = await response.text();
 
     // 尝试从主M3U8文件中提取分辨率信息
-    const masterPlaylistRegex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+)x(\d+).*
-(.*)/g;
+    const masterPlaylistRegex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+)x(\d+)/g;
     let match;
     let maxWidth = 0;
 
