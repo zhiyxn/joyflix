@@ -108,7 +108,7 @@ html {
   transform: translatex(-50%);
   display: block;
   width: 6px;
-  height: 600px; /* Increased height to reach top of page */
+  height: 1000px; /* Increased height to reach top of page */
   background-color: var(--stroke-color);
   z-index: 2;
 }
@@ -359,7 +359,7 @@ html {
   width: 300px;
   height: 50px;
   border-radius: 50%;
-  background-color: #AAAAAA; /* Changed to lighter gray */
+  background-color: #60a5fa;
   z-index: -1;
 }
 

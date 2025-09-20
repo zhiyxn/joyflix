@@ -350,7 +350,7 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                               ? '站长'
                               : user.role === 'admin'
                                 ? '管理员'
-                                : '普通用户'}
+                                : '用户'}
                           </span>
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap'>

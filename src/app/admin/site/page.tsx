@@ -328,9 +328,6 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
               </div>
             )}
           </div>
-          <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
-            选择获取豆瓣数据的方式
-          </p>
         </div>
 
         {siteSettings.DoubanProxyType === 'custom' && (
@@ -438,9 +435,6 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
                 </div>
               )}
           </div>
-          <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
-            选择获取豆瓣图片的方式
-          </p>
         </div>
 
         {siteSettings.DoubanImageProxyType === 'custom' && (
@@ -555,9 +549,6 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
             />
           </button>
         </div>
-        <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
-          禁用黄色内容的过滤功能，允许显示所有内容。
-        </p>
       </div>
 
       {/* 操作按钮 */}

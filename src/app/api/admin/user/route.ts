@@ -261,7 +261,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        // 权限检查：站长可删除所有用户（除了自己），管理员可删除普通用户
+        // 权限检查：站长可删除所有用户（除了自己），管理员可删除用户
         if (username === targetUsername) {
           return NextResponse.json(
             { error: '不能删除自己' },

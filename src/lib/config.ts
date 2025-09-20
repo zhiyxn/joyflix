@@ -339,7 +339,7 @@ export async function getConfig(): Promise<AdminConfig> {
     }));
 
     const ownerUser = process.env.USERNAME || '';
-    // 检查配置中的站长用户是否和 USERNAME 匹配，如果不匹配则降级为普通用户
+    // 检查配置中的站长用户是否和 USERNAME 匹配，如果不匹配则降级为用户
     let containOwner = false;
     adminConfig.UserConfig.Users.forEach((user) => {
       if (user.username !== ownerUser && user.role === 'owner') {
