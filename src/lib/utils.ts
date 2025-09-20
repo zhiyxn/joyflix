@@ -77,7 +77,6 @@ export async function getVideoResolutionFromM3u8(m3u8Url: string): Promise<{
     video.preload = 'metadata';
 
     const hls = new Hls({
-      // 8秒内必须加载到首个片段，否则超时
       fragLoadingTimeOut: 8000,
     });
 
@@ -89,39 +88,57 @@ export async function getVideoResolutionFromM3u8(m3u8Url: string): Promise<{
 
     let requestTime = 0;
     let hasResolved = false;
+    
+    // Flags to track event completion
+    let isFragLoaded = false;
+    let isMetadataLoaded = false;
 
-    const cleanup = () => {
+    const cleanupAndResolve = () => {
       if (hasResolved) return;
-      hasResolved = true;
       
+      // 确保两个事件都已触发再 resolve
+      if (!isFragLoaded || !isMetadataLoaded) return;
+
+      hasResolved = true;
       clearTimeout(timeout);
+      
       if (hls) {
-        hls.off(Hls.Events.FRAG_LOADING);
-        hls.off(Hls.Events.FRAG_LOADED);
-        hls.off(Hls.Events.ERROR);
         hls.destroy();
       }
       if (video) {
-        video.onloadedmetadata = null;
-        video.onerror = null;
         video.src = '';
         video.load();
         video.remove();
       }
+      
+      resolve({
+        ...testResult,
+        pingTime: Math.round(testResult.pingTime),
+      });
     };
 
-    // 设置一个总体的、最后的超时防线
+    const cleanupAndReject = (error: Error) => {
+        if (hasResolved) return;
+        hasResolved = true;
+        clearTimeout(timeout);
+
+        if (hls) {
+            hls.destroy();
+        }
+        if (video) {
+            video.src = '';
+            video.load();
+            video.remove();
+        }
+        reject(error);
+    };
+
+    // 设置一个最终的超时保护
     const timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error('Timeout: Test took longer than 8 seconds.'));
+      cleanupAndReject(new Error('Timeout: Test took longer than 8 seconds.'));
     }, 8000);
 
-    video.onerror = () => {
-      cleanup();
-      reject(new Error('Video element failed to load metadata.'));
-    };
-
-    // 监听HLS事件
+    // 监听 HLS 事件
     hls.on(Hls.Events.FRAG_LOADING, () => {
       if (testResult.pingTime === 0) {
         testResult.pingTime = performance.now() - requestTime;
@@ -129,38 +146,40 @@ export async function getVideoResolutionFromM3u8(m3u8Url: string): Promise<{
     });
 
     hls.on(Hls.Events.FRAG_LOADED, (event, data) => {
-      // 首个片段加载成功，我们已经获得了足够的信息来判断线路是否可用
       const loadTime = data.frag.stats.loading.end - data.frag.stats.loading.first;
       const size = data.frag.stats.loaded;
       if (loadTime > 0 && size > 0) {
         const speedKBps = size / 1024 / (loadTime / 1000);
         testResult.loadSpeed = speedKBps >= 1024 ? `${(speedKBps / 1024).toFixed(1)} MB/s` : `${speedKBps.toFixed(1)} KB/s`;
       }
-
-      // 尝试从 video 元素获取分辨率
-      if (video.videoWidth > 0) {
-         const width = video.videoWidth;
-         testResult.quality =
-            width >= 3840 ? '4K' :
-            width >= 2560 ? '2K' :
-            width >= 1920 ? '1080P' :
-            width >= 1280 ? '720P' :
-            width >= 854 ? '480P' : 'SD';
-      }
-      
-      cleanup();
-      resolve({
-        ...testResult,
-        pingTime: Math.round(testResult.pingTime),
-      });
+      isFragLoaded = true;
+      cleanupAndResolve();
     });
 
     hls.on(Hls.Events.ERROR, (event, data) => {
       if (data.fatal) {
-        cleanup();
-        reject(new Error(`HLS fatal error: ${data.details}`));
+        cleanupAndReject(new Error(`HLS fatal error: ${data.details}`));
       }
     });
+
+    // 监听 video 元素的事件
+    video.onloadedmetadata = () => {
+      if (video.videoWidth > 0) {
+        const width = video.videoWidth;
+        testResult.quality =
+          width >= 3840 ? '4K' :
+          width >= 2560 ? '2K' :
+          width >= 1920 ? '1080P' :
+          width >= 1280 ? '720P' :
+          width >= 854 ? '480P' : 'SD';
+      }
+      isMetadataLoaded = true;
+      cleanupAndResolve();
+    };
+    
+    video.onerror = () => {
+      cleanupAndReject(new Error('Video element failed to load. Possible CORS or network issue.'));
+    };
 
     // 启动测试
     requestTime = performance.now();
