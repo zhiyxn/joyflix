@@ -2335,61 +2335,6 @@ function PlayPageClient() {
             </div>
 
             {/* 进度指示器 */}
-            {/* New Animation */}
-            <div className="wrapper">
-                {/* 茶包 */}
-                <div className="teabag">
-                    {/* 茶包顶部 */}
-                    <div className="teabag-top"></div>
-                    {/* 茶包身体 */}
-                    <div className="teabag-body">
-                        <div className="teabag-content">
-                            <div className="teabag-eyes eyes">
-                                <div className="teabag-eye eye"></div>
-                                <div className="teabag-eye eye"></div>
-                            </div>
-                            <div className="teabag-mouth"></div>
-                        </div>
-                    </div>
-                    {/* 茶包孔 */}
-                    <div className="teabag-pores">
-                        <span className="teabag-pore"></span>
-                        <span className="teabag-pore"></span>
-                        <span className="teabag-pore"></span>
-                        <span className="teabag-pore"></span>
-                        <span className="teabag-pore"></span>
-                        <span className="teabag-pore"></span>
-                        <span className="teabag-pore"></span>
-                        <span className="teabag-pore"></span>
-                        <span className="teabag-pore"></span>
-                        <span className="teabag-pore"></span>
-                        <span className="teabag-pore"></span>
-                        <span className="teabag-pore"></span>
-                        <span className="teabag-pore"></span>
-                        <span className="teabag-pore"></span>
-                    </div>
-                </div>
-                {/* 茶杯 */}
-                <div className="cup">
-                    {/* 杯子 */}
-                    <div className="cup-body">
-                        <div className="cup-eyes eyes">
-                            <div className="cup-eye eye"></div>
-                            <div className="cup-eye eye"></div>
-                        </div>
-                        <div className="cup-mouth">
-                            <div className="cup-tongue"></div>
-                        </div>
-                    </div>
-                    {/* 杯柄 */}
-                    <div className="cup-handle"></div>
-                    {/* 杯碟 */}
-                    <div className="cup-saucer">
-                        <div className="cup-saucer-top"></div>
-                        <div className="cup-saucer-bottom"></div>
-                    </div>
-                </div>
-            </div> {/* 进度指示器 */}
             <div className='-mt-8 mb-6 w-80 mx-auto'>
               <div className='flex justify-center space-x-2 mb-4'>
                 <div
