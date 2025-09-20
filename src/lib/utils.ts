@@ -130,8 +130,8 @@ export async function getVideoResolutionFromM3u8(m3u8Url: string): Promise<{
 
     hls.on(Hls.Events.FRAG_LOADED, (event, data) => {
       // 首个片段加载成功，我们已经获得了足够的信息来判断线路是否可用
-      const loadTime = data.stats.loading.end - data.stats.loading.first;
-      const size = data.stats.loaded;
+      const loadTime = data.frag.stats.loading.end - data.frag.stats.loading.first;
+      const size = data.frag.stats.loaded;
       if (loadTime > 0 && size > 0) {
         const speedKBps = size / 1024 / (loadTime / 1000);
         testResult.loadSpeed = speedKBps >= 1024 ? `${(speedKBps / 1024).toFixed(1)} MB/s` : `${speedKBps.toFixed(1)} KB/s`;
