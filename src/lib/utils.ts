@@ -2,6 +2,16 @@
 import he from 'he';
 import Hls from 'hls.js';
 
+// 辅助函数：根据宽度获取标准画质名称
+export const getStandardQualityName = (width: number): string => {
+  if (width >= 3840) return '4K';
+  if (width >= 2560) return '2K';
+  if (width >= 1920) return '1080P';
+  if (width >= 1280) return '720P';
+  if (width >= 854) return '480P';
+  return 'SD';
+};
+
 function getDoubanImageProxyConfig(): {
   proxyType:
     | 'direct'
@@ -66,126 +76,148 @@ export function processImageUrl(originalUrl: string): string {
  * @param m3u8Url m3u8播放列表的URL
  * @returns Promise<{quality: string, loadSpeed: string, pingTime: number}> 视频质量等级和网络信息
  */
-export async function getVideoResolutionFromM3u8(m3u8Url: string): Promise<{
-  quality: string;
-  loadSpeed: string;
-  pingTime: number;
-}> {
-  return new Promise((resolve, reject) => {
-    const video = document.createElement('video');
-    video.muted = true;
-    video.preload = 'metadata';
+export async function getVideoResolutionFromM3u8(m3u8Url: string): Promise<{ quality: string; loadSpeed: string; pingTime: number; }> {
+  const testResult = {
+    quality: '未知',
+    loadSpeed: '未知',
+    pingTime: 0,
+  };
 
-    const hls = new Hls({
-      fragLoadingTimeOut: 8000,
-    });
+  try {
+    const startTime = performance.now();
+    const response = await fetch(m3u8Url);
+    testResult.pingTime = performance.now() - startTime;
 
-    let testResult = {
-      quality: '未知',
-      loadSpeed: '未知',
-      pingTime: 0,
-    };
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const m3u8Content = await response.text();
 
-    let requestTime = 0;
-    let hasResolved = false;
-    
-    // Flags to track event completion
-    let isFragLoaded = false;
-    let isMetadataLoaded = false;
+    // 尝试从主M3U8文件中提取分辨率信息
+    const masterPlaylistRegex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+)x(\d+).*
+(.*)/g;
+    let match;
+    let maxWidth = 0;
 
-    const cleanupAndResolve = () => {
-      if (hasResolved) return;
-      
-      // 确保两个事件都已触发再 resolve
-      if (!isFragLoaded || !isMetadataLoaded) return;
-
-      hasResolved = true;
-      clearTimeout(timeout);
-      
-      if (hls) {
-        hls.destroy();
+    while ((match = masterPlaylistRegex.exec(m3u8Content)) !== null) {
+      const width = parseInt(match[1], 10);
+      if (width > maxWidth) {
+        maxWidth = width;
       }
-      if (video) {
-        video.src = '';
-        video.load();
-        video.remove();
-      }
-      
-      resolve({
+    }
+
+    if (maxWidth > 0) {
+      testResult.quality = getStandardQualityName(maxWidth);
+      return {
         ...testResult,
         pingTime: Math.round(testResult.pingTime),
-      });
-    };
+      };
+    }
 
-    const cleanupAndReject = (error: Error) => {
+    // 如果不是主M3U8或主M3U8中没有分辨率信息，则回退到HLS.js加载视频元素的方式
+    return await new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      video.muted = true;
+      video.preload = 'metadata';
+
+      const hls = new Hls({
+        fragLoadingTimeOut: 8000,
+      });
+
+      let requestTime = 0;
+      let hasResolved = false;
+      let isFragLoaded = false;
+      let isMetadataLoaded = false;
+
+      const cleanupAndResolve = () => {
+        if (hasResolved) return;
+        if (!isFragLoaded || !isMetadataLoaded) return;
+
+        hasResolved = true;
+        clearTimeout(timeout);
+
+        if (hls) {
+          hls.destroy();
+        }
+        if (video) {
+          video.src = '';
+          video.load();
+          video.remove();
+        }
+
+        resolve({
+          ...testResult,
+          pingTime: Math.round(testResult.pingTime),
+        });
+      };
+
+      const cleanupAndReject = (error: Error) => {
         if (hasResolved) return;
         hasResolved = true;
         clearTimeout(timeout);
 
         if (hls) {
-            hls.destroy();
+          hls.destroy();
         }
         if (video) {
-            video.src = '';
-            video.load();
-            video.remove();
+          video.src = '';
+          video.load();
+          video.remove();
         }
         reject(error);
-    };
+      };
 
-    // 设置一个最终的超时保护
-    const timeout = setTimeout(() => {
-      cleanupAndReject(new Error('Timeout: Test took longer than 8 seconds.'));
-    }, 8000);
+      const timeout = setTimeout(() => {
+        cleanupAndReject(new Error('Timeout: Test took longer than 8 seconds.'));
+      }, 8000);
 
-    // 监听 HLS 事件
-    hls.on(Hls.Events.FRAG_LOADING, () => {
-      if (testResult.pingTime === 0) {
-        testResult.pingTime = performance.now() - requestTime;
-      }
+      hls.on(Hls.Events.FRAG_LOADING, () => {
+        if (testResult.pingTime === 0) {
+          testResult.pingTime = performance.now() - requestTime;
+        }
+      });
+
+      hls.on(Hls.Events.FRAG_LOADED, (event, data) => {
+        const loadTime = data.frag.stats.loading.end - data.frag.stats.loading.first;
+        const size = data.frag.stats.loaded;
+        if (loadTime > 0 && size > 0) {
+          const speedKBps = size / 1024 / (loadTime / 1000);
+          testResult.loadSpeed = speedKBps >= 1024 ? `${(speedKBps / 1024).toFixed(1)} MB/s` : `${speedKBps.toFixed(1)} KB/s`;
+        }
+        isFragLoaded = true;
+        cleanupAndResolve();
+      });
+
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        if (data.fatal) {
+          cleanupAndReject(new Error(`HLS fatal error: ${data.details}`));
+        }
+      });
+
+      video.onloadedmetadata = () => {
+        if (video.videoWidth > 0) {
+          const width = video.videoWidth;
+          testResult.quality = getStandardQualityName(width);
+        }
+        isMetadataLoaded = true;
+        cleanupAndResolve();
+      };
+
+      video.onerror = () => {
+        cleanupAndReject(new Error('Video element failed to load. Possible CORS or network issue.'));
+      };
+
+      requestTime = performance.now();
+      hls.loadSource(m3u8Url);
+      hls.attachMedia(video);
     });
-
-    hls.on(Hls.Events.FRAG_LOADED, (event, data) => {
-      const loadTime = data.frag.stats.loading.end - data.frag.stats.loading.first;
-      const size = data.frag.stats.loaded;
-      if (loadTime > 0 && size > 0) {
-        const speedKBps = size / 1024 / (loadTime / 1000);
-        testResult.loadSpeed = speedKBps >= 1024 ? `${(speedKBps / 1024).toFixed(1)} MB/s` : `${speedKBps.toFixed(1)} KB/s`;
-      }
-      isFragLoaded = true;
-      cleanupAndResolve();
-    });
-
-    hls.on(Hls.Events.ERROR, (event, data) => {
-      if (data.fatal) {
-        cleanupAndReject(new Error(`HLS fatal error: ${data.details}`));
-      }
-    });
-
-    // 监听 video 元素的事件
-    video.onloadedmetadata = () => {
-      if (video.videoWidth > 0) {
-        const width = video.videoWidth;
-        testResult.quality =
-          width >= 3840 ? '4K' :
-          width >= 2560 ? '2K' :
-          width >= 1920 ? '1080P' :
-          width >= 1280 ? '720P' :
-          width >= 854 ? '480P' : 'SD';
-      }
-      isMetadataLoaded = true;
-      cleanupAndResolve();
+  } catch (error) {
+    console.error('获取视频分辨率失败:', error);
+    return {
+      ...testResult,
+      pingTime: Math.round(testResult.pingTime),
     };
-    
-    video.onerror = () => {
-      cleanupAndReject(new Error('Video element failed to load. Possible CORS or network issue.'));
-    };
-
-    // 启动测试
-    requestTime = performance.now();
-    hls.loadSource(m3u8Url);
-    hls.attachMedia(video);
-  });
+  }
 }
 
 export function cleanHtmlTags(text: string): string {

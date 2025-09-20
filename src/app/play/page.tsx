@@ -19,7 +19,7 @@ import {
   subscribeToDataUpdates,
 } from '@/lib/db.client';
 import { SearchResult } from '@/lib/types';
-import { getVideoResolutionFromM3u8, processImageUrl } from '@/lib/utils';
+import { getStandardQualityName, getVideoResolutionFromM3u8, processImageUrl } from '@/lib/utils';
 
 import EpisodeSelector from '@/components/EpisodeSelector';
 import PageLayout from '@/components/PageLayout';
@@ -46,15 +46,8 @@ interface PlaybackRateSelector {
   html: string;
 }
 
-// 辅助函数：根据宽度获取标准画质名称
-const getStandardQualityName = (width: number): string => {
-  if (width >= 3840) return '4K';
-  if (width >= 2560) return '2K';
-  if (width >= 1920) return '1080P';
-  if (width >= 1280) return '720P';
-  if (width >= 854) return '480P';
-  return 'SD';
-};
+
+
 
 function PlayPageClient() {
   const router = useRouter();
