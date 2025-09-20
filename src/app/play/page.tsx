@@ -2276,8 +2276,8 @@ function PlayPageClient() {
   if (loading) {
     return (
       <PageLayout activePath='/play'>
-        <div className='flex items-center justify-center min-h-screen bg-transparent'>
-          <div className='text-center max-w-md mx-auto px-6'>
+        <div className='flex items-center justify-center h-full md:min-h-screen bg-transparent'>
+          <div className='text-center max-w-md mx-auto px-6 transform -translate-y-6 md:transform-none'>
             {/* New Animation */}
             <div className="wrapper">
                 {/* 茶包 */}
