@@ -66,7 +66,7 @@ export function processImageUrl(originalUrl: string): string {
  * @param m3u8Url m3u8播放列表的URL
  * @returns Promise<{quality: string, loadSpeed: string, pingTime: number}> 视频质量等级和网络信息
  */
-async function _getVideoResolutionFromM3u8(m3u8Url: string): Promise<{
+export async function getVideoResolutionFromM3u8(m3u8Url: string): Promise<{
   quality: string;
   loadSpeed: string;
   pingTime: number;
@@ -76,20 +76,24 @@ async function _getVideoResolutionFromM3u8(m3u8Url: string): Promise<{
     video.muted = true;
     video.preload = 'metadata';
 
-    const pingStart = performance.now();
-    let pingTime = 0;
+    const hls = new Hls({
+      // 8秒内必须加载到首个片段，否则超时
+      fragLoadingTimeOut: 8000,
+    });
 
-    fetch(m3u8Url, { method: 'HEAD', mode: 'no-cors' })
-      .then(() => {
-        pingTime = performance.now() - pingStart;
-      })
-      .catch(() => {
-        pingTime = performance.now() - pingStart;
-      });
+    let testResult = {
+      quality: '未知',
+      loadSpeed: '未知',
+      pingTime: 0,
+    };
 
-    const hls = new Hls();
+    let requestTime = 0;
+    let hasResolved = false;
 
     const cleanup = () => {
+      if (hasResolved) return;
+      hasResolved = true;
+      
       clearTimeout(timeout);
       if (hls) {
         hls.off(Hls.Events.FRAG_LOADING);
@@ -106,132 +110,63 @@ async function _getVideoResolutionFromM3u8(m3u8Url: string): Promise<{
       }
     };
 
+    // 设置一个总体的、最后的超时防线
     const timeout = setTimeout(() => {
       cleanup();
-      reject(new Error('Timeout loading video metadata'));
-    }, 8000); // 增加 Safari 浏览器超时时间
+      reject(new Error('Timeout: Test took longer than 8 seconds.'));
+    }, 8000);
 
     video.onerror = () => {
       cleanup();
-      reject(new Error('Failed to load video metadata'));
+      reject(new Error('Video element failed to load metadata.'));
     };
 
-    let actualLoadSpeed = '未知';
-    let hasSpeedCalculated = false;
-    let fragmentStartTime = 0; // 用于手动计时
-
-    const checkAndResolve = () => {
-      const width = video.videoWidth;
-      cleanup();
-
-      if (width && width > 0) {
-        const quality =
-          width >= 3840 ? '4K' :
-          width >= 2560 ? '2K' :
-          width >= 1920 ? '1080P' :
-          width >= 1280 ? '720P' :
-          width >= 854 ? '480P' : 'SD';
-        resolve({ quality, loadSpeed: actualLoadSpeed, pingTime: Math.round(pingTime) });
-      } else {
-        resolve({ quality: '未知', loadSpeed: actualLoadSpeed, pingTime: Math.round(pingTime) });
-      }
-    };
-
+    // 监听HLS事件
     hls.on(Hls.Events.FRAG_LOADING, () => {
-        fragmentStartTime = performance.now();
+      if (testResult.pingTime === 0) {
+        testResult.pingTime = performance.now() - requestTime;
+      }
     });
 
     hls.on(Hls.Events.FRAG_LOADED, (event, data) => {
-      if (!hasSpeedCalculated && data.payload.byteLength && fragmentStartTime > 0) {
-        const loadTime = performance.now() - fragmentStartTime;
-        const size = data.payload.byteLength;
-        if (loadTime > 0 && size > 0) {
-          const speedKBps = size / 1024 / (loadTime / 1000);
-          actualLoadSpeed = speedKBps >= 1024 ? `${(speedKBps / 1024).toFixed(1)} MB/s` : `${speedKBps.toFixed(1)} KB/s`;
-          hasSpeedCalculated = true;
-        }
+      // 首个片段加载成功，我们已经获得了足够的信息来判断线路是否可用
+      const loadTime = data.stats.loading.end - data.stats.loading.first;
+      const size = data.stats.loaded;
+      if (loadTime > 0 && size > 0) {
+        const speedKBps = size / 1024 / (loadTime / 1000);
+        testResult.loadSpeed = speedKBps >= 1024 ? `${(speedKBps / 1024).toFixed(1)} MB/s` : `${speedKBps.toFixed(1)} KB/s`;
       }
-    });
 
-    video.onloadedmetadata = checkAndResolve;
+      // 尝试从 video 元素获取分辨率
+      if (video.videoWidth > 0) {
+         const width = video.videoWidth;
+         testResult.quality =
+            width >= 3840 ? '4K' :
+            width >= 2560 ? '2K' :
+            width >= 1920 ? '1080P' :
+            width >= 1280 ? '720P' :
+            width >= 854 ? '480P' : 'SD';
+      }
+      
+      cleanup();
+      resolve({
+        ...testResult,
+        pingTime: Math.round(testResult.pingTime),
+      });
+    });
 
     hls.on(Hls.Events.ERROR, (event, data) => {
       if (data.fatal) {
         cleanup();
-        reject(new Error(`HLS playback failed: ${data.type} - ${data.details}`));
+        reject(new Error(`HLS fatal error: ${data.details}`));
       }
     });
 
+    // 启动测试
+    requestTime = performance.now();
     hls.loadSource(m3u8Url);
     hls.attachMedia(video);
   });
-}
-
-async function _getVideoResolutionFromManifest(m3u8Url: string): Promise<{
-  quality: string;
-  loadSpeed: string;
-  pingTime: number;
-}> {
-  const pingStart = performance.now();
-  const response = await fetch(m3u8Url);
-  const pingTime = performance.now() - pingStart;
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const content = await response.text();
-  const size = new TextEncoder().encode(content).length;
-  const loadTime = pingTime;
-
-  let loadSpeed = '未知';
-  if (loadTime > 0 && size > 0) {
-    const speedKBps = size / 1024 / (loadTime / 1000);
-    loadSpeed = speedKBps >= 1024 ? `${(speedKBps / 1024).toFixed(1)} MB/s` : `${speedKBps.toFixed(1)} KB/s`;
-  }
-
-  const resolutionRegex = /RESOLUTION=(\d+)x(\d+)/g;
-  let match;
-  let maxResolution = 0;
-
-  while ((match = resolutionRegex.exec(content)) !== null) {
-    const width = parseInt(match[1], 10);
-    if (width > maxResolution) {
-      maxResolution = width;
-    }
-  }
-
-  let quality = '未知';
-  if (maxResolution > 0) {
-    quality =
-      maxResolution >= 3840 ? '4K' :
-      maxResolution >= 2560 ? '2K' :
-      maxResolution >= 1920 ? '1080P' :
-      maxResolution >= 1280 ? '720P' :
-      maxResolution >= 854 ? '480P' : 'SD';
-  }
-
-  return { quality, loadSpeed, pingTime: Math.round(pingTime) };
-}
-
-export async function getVideoResolutionFromM3u8(m3u8Url: string): Promise<{
-  quality: string;
-  loadSpeed: string;
-  pingTime: number;
-}> {
-  try {
-    const primaryResult = await _getVideoResolutionFromM3u8(m3u8Url);
-    if (primaryResult.quality !== '未知') {
-      return primaryResult; // 主要方法成功
-    }
-    // 主要方法未能确定质量，尝试回退
-    console.warn('Primary method failed for quality, trying manifest parsing as fallback.');
-    return await _getVideoResolutionFromManifest(m3u8Url);
-  } catch (error) {
-    console.error('Primary method failed with error, trying manifest parsing as fallback:', error);
-    // 主要方法失败并出现错误，尝试回退
-    return await _getVideoResolutionFromManifest(m3u8Url);
-  }
 }
 
 export function cleanHtmlTags(text: string): string {
