@@ -365,21 +365,21 @@ function PlayPageClient() {
   ): number => {
     let score = 0;
 
-    // 分辨率评分 (50% 权重)
+    // 分辨率评分 (50% 权重) - 非线性调整
     const qualityScore = (() => {
       switch (testResult.quality) {
         case '4K':
-          return 100;
+          return 100; // 最高分，代表极致体验
         case '2K':
-          return 85;
+          return 90; // 从 1080P 到 2K 有显著提升，给予较高分数
         case '1080P':
-          return 75;
+          return 70; // 普遍接受的高清标准，与 2K/4K 拉开差距
         case '720P':
-          return 60;
+          return 45; // 从 1080P 到 720P 体验下降明显，分数下降幅度较大
         case '480P':
-          return 40;
+          return 20; // 勉强可接受的画质，分数较低
         case 'SD':
-          return 20;
+          return 5;  // 极低画质，几乎不推荐，分数非常低
         default:
           return 0;
       }
@@ -418,6 +418,39 @@ function PlayPageClient() {
       return Math.min(100, Math.max(0, pingRatio * 100));
     })();
     score += pingScore * 0.2;
+
+    // --- 惩罚机制 ---
+    // 定义惩罚阈值和扣减比例（这些值可以根据实际情况调整）
+    const HIGH_PING_THRESHOLD_MS = 500; // 超过 500ms 的延迟开始惩罚
+    const LOW_SPEED_THRESHOLD_KBPS = 500; // 低于 500 KB/s 的速度开始惩罚
+    const HIGH_PING_PENALTY_FACTOR = 0.3; // 高延迟扣减 30% 的分数
+    const LOW_SPEED_PENALTY_FACTOR = 0.5; // 低速度扣减 50% 的分数
+
+    // 应用高延迟惩罚
+    if (testResult.pingTime > HIGH_PING_THRESHOLD_MS) {
+      score *= (1 - HIGH_PING_PENALTY_FACTOR);
+      console.log(`  - 应用高延迟惩罚: ${testResult.pingTime}ms > ${HIGH_PING_THRESHOLD_MS}ms`);
+    }
+
+    // 解析速度值（统一转换为 KB/s）
+    const speedValueKBps = (() => {
+      const speedStr = testResult.loadSpeed;
+      if (speedStr === '未知' || speedStr === '测量中...') return 0;
+      const match = speedStr.match(/^([\d.]+)\s*(KB\/s|MB\/s)$/);
+      if (!match) return 0;
+      const value = parseFloat(match[1]);
+      const unit = match[2];
+      return unit === 'MB/s' ? value * 1024 : value;
+    })();
+
+    // 应用低速度惩罚
+    if (speedValueKBps > 0 && speedValueKBps < LOW_SPEED_THRESHOLD_KBPS) {
+      score *= (1 - LOW_SPEED_PENALTY_FACTOR);
+      console.log(`  - 应用低速度惩罚: ${speedValueKBps}KB/s < ${LOW_SPEED_THRESHOLD_KBPS}KB/s`);
+    }
+
+    // 确保分数不会低于 0
+    score = Math.max(0, score);
 
     return Math.round(score * 100) / 100; // 保留两位小数
   };
