@@ -13,7 +13,7 @@ interface MobileHeaderProps {
 const MobileHeader = ({ showBackButton = false }: MobileHeaderProps) => {
   const { siteName } = useSite();
   return (
-    <header className='md:hidden relative w-full bg-transparent'>
+    <header className='md:hidden relative w-full bg-transparent z-10'>
       <div className='h-12 flex items-center justify-between px-4'>
         {/* 左侧：返回按钮和本地设置按钮 */}
         <div className='flex items-center gap-2'>
