@@ -2276,7 +2276,7 @@ function PlayPageClient() {
   if (loading) {
     return (
       <PageLayout activePath='/play'>
-        <div className='flex items-center justify-center min-h-[calc(100vh-3rem)] md:min-h-screen bg-transparent'>
+        <div className='flex items-center justify-center min-h-[calc(100vh-3rem)] md:min-h-screen bg-transparent overflow-hidden md:overflow-visible'>
           <div className='text-center max-w-md mx-auto px-6 md:transform md:-translate-y-4'>
             {/* New Animation */}
             <div className="wrapper">
