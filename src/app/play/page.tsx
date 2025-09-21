@@ -2374,26 +2374,26 @@ function PlayPageClient() {
                 <div
                   className={`w-3 h-3 rounded-full transition-all duration-500 ${ 
                     loadingStage === 'searching' || loadingStage === 'fetching'
-                      ? 'bg-blue-400 scale-125'
+                      ? 'bg-joyflix-blue scale-125'
                       : loadingStage === 'preferring' ||
                         loadingStage === 'ready'
-                      ? 'bg-blue-400'
+                      ? 'bg-joyflix-blue'
                       : 'bg-gray-200'
                   }`}
                 ></div>
                 <div
                   className={`w-3 h-3 rounded-full transition-all duration-500 ${ 
                     loadingStage === 'preferring'
-                      ? 'bg-blue-400 scale-125'
+                      ? 'bg-joyflix-blue scale-125'
                       : loadingStage === 'ready'
-                      ? 'bg-blue-400'
+                      ? 'bg-joyflix-blue'
                       : 'bg-gray-200'
                   }`}
                 ></div>
                 <div
                   className={`w-3 h-3 rounded-full transition-all duration-500 ${ 
                     loadingStage === 'ready'
-                      ? 'bg-blue-400 scale-125'
+                      ? 'bg-joyflix-blue scale-125'
                       : 'bg-gray-200'
                   }`}
                 ></div>
@@ -2402,7 +2402,7 @@ function PlayPageClient() {
               {/* 进度条 */}
               <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden'>
                 <div
-                  className='h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full transition-all duration-1000 ease-out'
+                  className='h-full bg-gradient-to-r from-joyflix-blue to-joyflix-blue-dark rounded-full transition-all duration-1000 ease-out'
                   style={{
                     width:
                       loadingStage === 'searching' ||
