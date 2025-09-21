@@ -202,7 +202,7 @@ const SearchPageClient: React.FC = () => {
       // 新增：过滤标题中含有“电影解说”、“剧情解说”、“预告片”、“解说”的影片
       const filterKeywords = ['电影解说', '剧情解说', '预告片', '解说'];
       results = results.filter(
-        (result) =>
+        (result: SearchResult) =>
           !filterKeywords.some((keyword) => result.title.includes(keyword))
       );
 
