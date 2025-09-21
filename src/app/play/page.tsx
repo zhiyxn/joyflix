@@ -1320,23 +1320,19 @@ function PlayPageClient() {
       }
 
       let detailData: SearchResult = sourcesInfo[0];
-      let forcePrefer = false;
       let historyRecord = null;
       if (currentSource && currentId) {
         try {
           const allRecords = await getAllPlayRecords();
           const key = generateStorageKey(currentSource, currentId);
           historyRecord = allRecords[key];
-          if (historyRecord) {
-            forcePrefer = true;
-          }
         } catch (err) {
           console.error('读取播放记录失败:', err);
         }
       }
 
-      // 指定源和id且无需优选
-      if (currentSource && currentId && !needPreferRef.current && !forcePrefer) {
+      // 指定源和id且无需优选 (包括从“继续观看”来的)
+      if (currentSource && currentId && !needPreferRef.current) {
         const target = sourcesInfo.find(
           (source) => source.source === currentSource && source.id === currentId
         );
@@ -1348,12 +1344,8 @@ function PlayPageClient() {
           return;
         }
       }
-
       // 未指定源和 id 或需要优选，且开启优选开关
-      if (
-        (!currentSource || !currentId || needPreferRef.current || forcePrefer) &&
-        optimizationEnabled
-      ) {
+      else if (optimizationEnabled) {
         setLoadingStage('preferring');
         setLoadingMessage('正在优选最佳路线');
 
