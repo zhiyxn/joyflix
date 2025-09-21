@@ -408,23 +408,23 @@ html {
   }
 
   20% {
-    transform: translateY(150px);
+    transform: translateY(140px);
   }
 
   25% {
-    transform: translateY(130px);
-  }
-
-  35% {
-    transform: translateY(150px);
-  }
-
-  40% {
     transform: translateY(120px);
   }
 
+  35% {
+    transform: translateY(140px);
+  }
+
+  40% {
+    transform: translateY(110px);
+  }
+
   50% {
-    transform: translateY(130px);
+    transform: translateY(120px);
   }
 
   60%,
@@ -450,8 +450,4 @@ html {
     translate: 0 150px;
     opacity: 0;
   }
-}
-
-.cup {
-  overflow: hidden;
 }
