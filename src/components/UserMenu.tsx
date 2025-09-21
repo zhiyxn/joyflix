@@ -119,7 +119,6 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
   };
 
   // Settings states
-  const [defaultAggregateSearch, setDefaultAggregateSearch] = useState(true);
   const [doubanProxyUrl, setDoubanProxyUrl] = useState('');
   const [enableOptimization, setEnableOptimization] = useState(true);
   const [doubanDataSource, setDoubanDataSource] = useState('direct');
@@ -186,8 +185,7 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedAggregateSearch = localStorage.getItem('defaultAggregateSearch');
-      if (savedAggregateSearch !== null) setDefaultAggregateSearch(JSON.parse(savedAggregateSearch));
+      
 
       const savedDoubanDataSource = localStorage.getItem('doubanDataSource');
       const defaultDoubanProxyType = (window as any).RUNTIME_CONFIG?.DOUBAN_PROXY_TYPE || 'direct';
@@ -309,7 +307,7 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
     setDoubanImageProxyType(defaultDoubanImageProxyType);
     setDoubanImageProxyUrl(defaultDoubanImageProxyUrl);
 
-    localStorage.setItem('defaultAggregateSearch', JSON.stringify(true));
+    
     localStorage.setItem('enableOptimization', JSON.stringify(true));
     localStorage.setItem('doubanProxyUrl', defaultDoubanProxy);
     localStorage.setItem('doubanDataSource', defaultDoubanProxyType);
@@ -488,28 +486,7 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
 
               <div className='border-t border-zinc-200 dark:border-zinc-700'></div>
 
-              {/* Aggregate Search Toggle */}
-              <div className='flex items-center justify-between'>
-                <div>
-                  <h4 className='font-medium text-zinc-800 dark:text-zinc-200'>启用聚合搜索</h4>
-                  <p className='text-xs text-zinc-500 dark:text-zinc-400 mt-1'>搜索结果按标题和年份聚合展示</p>
-                </div>
-                <label className='flex items-center cursor-pointer'>
-                  <div className='relative'>
-                    <input
-                      type='checkbox'
-                      className='sr-only peer'
-                      checked={defaultAggregateSearch}
-                      onChange={(e) => {
-                        setDefaultAggregateSearch(e.target.checked);
-                        localStorage.setItem('defaultAggregateSearch', JSON.stringify(e.target.checked));
-                      }}
-                    />
-                    <div className="w-11 h-6 bg-zinc-300 dark:bg-zinc-700 rounded-full peer-checked:bg-blue-400 transition-colors"></div>
-                    <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
-                  </div>
-                </label>
-              </div>
+              
 
               {/* Optimization Toggle */}
               <div className='flex items-center justify-between'>

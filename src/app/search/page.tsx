@@ -38,20 +38,9 @@ const SearchPageClient: React.FC = () => {
   >([]);
   const [isRecommendationsLoading, setIsRecommendationsLoading] = useState(true);
   
-  // 获取默认聚合设置：只读取用户本地设置，默认为 true
-  const getDefaultAggregate = () => {
-    if (typeof window !== 'undefined') {
-      const userSetting = localStorage.getItem('defaultAggregateSearch');
-      if (userSetting !== null) {
-        return JSON.parse(userSetting);
-      }
-    }
-    return true; // 默认启用聚合
-  };
+  
 
-  const [viewMode, setViewMode] = useState<'agg' | 'all'>(() => {
-    return getDefaultAggregate() ? 'agg' : 'all';
-  });
+  const [viewMode, setViewMode] = useState<'agg' | 'all'>('agg');
 
   // 聚合后的结果（按标题和年份分组）
   const aggregatedResults = useMemo(() => {
@@ -358,24 +347,7 @@ const SearchPageClient: React.FC = () => {
                 <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">
                   搜索结果
                 </h2>
-                {/* 聚合开关 */}
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    聚合
-                  </span>
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      checked={viewMode === 'agg'}
-                      onChange={() =>
-                        setViewMode(viewMode === 'agg' ? 'all' : 'agg')
-                      }
-                    />
-                    <div className="w-9 h-5 bg-gray-300 rounded-full peer-checked:bg-blue-400 transition-colors dark:bg-gray-600"></div>
-                    <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
-                  </div>
-                </label>
+                
               </div>
               {isLoading ? (
                 <div className="justify-start grid grid-cols-3 gap-x-2 gap-y-14 sm:gap-y-20 px-0 sm:px-2 sm:grid-cols-[repeat(auto-fill,_minmax(11rem,_1fr))] sm:gap-x-8">
