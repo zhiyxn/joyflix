@@ -300,7 +300,7 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
     const defaultDoubanImageProxyType = (window as any).RUNTIME_CONFIG?.DOUBAN_IMAGE_PROXY_TYPE || 'direct';
     const defaultDoubanImageProxyUrl = (window as any).RUNTIME_CONFIG?.DOUBAN_IMAGE_PROXY || '';
 
-    setDefaultAggregateSearch(true);
+    
     setEnableOptimization(true);
     setDoubanProxyUrl(defaultDoubanProxy);
     setDoubanDataSource(defaultDoubanProxyType);
