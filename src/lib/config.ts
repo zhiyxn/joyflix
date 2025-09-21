@@ -180,8 +180,6 @@ async function initConfig() {
             DoubanImageProxyType:
               process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE || 'img3',
             DoubanImageProxy: process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY || '',
-            DisableYellowFilter:
-              process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true',
           },
           UserConfig: {
             Users: allUsers as any,
@@ -228,8 +226,6 @@ async function initConfig() {
         DoubanImageProxyType:
           process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE || 'img3',
         DoubanImageProxy: process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY || '',
-        DisableYellowFilter:
-          process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true',
       },
       UserConfig: {
         Users: [],
@@ -286,8 +282,6 @@ export async function getConfig(): Promise<AdminConfig> {
       process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE || 'img3';
     adminConfig.SiteConfig.DoubanImageProxy =
       process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY || '';
-    adminConfig.SiteConfig.DisableYellowFilter =
-      process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true';
 
     // 合并文件中的源信息
     fileConfig = runtimeConfig as unknown as ConfigFileStruct;
@@ -420,8 +414,6 @@ export async function resetConfig() {
       DoubanImageProxyType:
         process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE || 'img3',
       DoubanImageProxy: process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY || '',
-      DisableYellowFilter:
-        process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true',
     },
     UserConfig: {
       Users: allUsers as any,

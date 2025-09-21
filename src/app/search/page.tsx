@@ -13,7 +13,7 @@ import {
   subscribeToDataUpdates,
 } from '@/lib/db.client';
 import { DoubanResult, SearchResult } from '@/lib/types';
-import { yellowWords } from '@/lib/yellow';
+
 
 import PageLayout from '@/components/PageLayout';
 import SearchSuggestions from '@/components/SearchSuggestions';
@@ -199,15 +199,14 @@ const SearchPageClient: React.FC = () => {
         return lowerCaseTitle.includes(lowerCaseQuery);
       });
 
-      if (
-        typeof window !== 'undefined' &&
-        !(window as any).RUNTIME_CONFIG?.DISABLE_YELLOW_FILTER
-      ) {
-        results = results.filter((result: SearchResult) => {
-          const typeName = result.type_name || '';
-          return !yellowWords.some((word: string) => typeName.replace(/[()]/g, '').includes(word));
-        });
-      }
+      // 新增：过滤标题中含有“电影解说”、“剧情解说”、“预告片”、“解说”的影片
+      const filterKeywords = ['电影解说', '剧情解说', '预告片', '解说'];
+      results = results.filter(
+        (result) =>
+          !filterKeywords.some((keyword) => result.title.includes(keyword))
+      );
+
+      
       setSearchResults(
         results.sort((a: SearchResult, b: SearchResult) => {
           // 优先排序：标题与搜索词完全一致的排在前面

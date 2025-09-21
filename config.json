@@ -115,6 +115,10 @@
     "hn": {
       "api": "https://www.hongniuzy2.com/api.php/provide/vod",
       "name": "红牛资源"
+    },
+    "ts": {
+      "api": "https://apiyutu.com/api.php/provide/vod",
+      "name": "玉兔"
     }
   },
     "custom_category": [

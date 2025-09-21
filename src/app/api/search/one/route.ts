@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { getCacheTime, getConfig } from '@/lib/config';
 import { searchFromApi } from '@/lib/downstream';
-import { yellowWords } from '@/lib/yellow';
+
 
 export const runtime = 'edge';
 
@@ -45,12 +45,7 @@ export async function GET(request: Request) {
 
     const results = await searchFromApi(targetSite, query);
     let result = results.filter((r) => r.title === query);
-    if (!config.SiteConfig.DisableYellowFilter) {
-      result = result.filter((result) => {
-        const typeName = result.type_name || '';
-        return !yellowWords.some((word: string) => typeName.replace(/[()]/g, '').includes(word));
-      });
-    }
+    
     const cacheTime = await getCacheTime();
 
     if (result.length === 0) {

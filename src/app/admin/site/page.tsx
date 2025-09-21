@@ -57,7 +57,7 @@ interface SiteConfig {
   DoubanProxy: string;
   DoubanImageProxyType: string;
   DoubanImageProxy: string;
-  DisableYellowFilter: boolean;
+  
 }
 
 // 站点配置组件
@@ -71,7 +71,7 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
     DoubanProxy: '',
     DoubanImageProxyType: 'direct',
     DoubanImageProxy: '',
-    DisableYellowFilter: false,
+    
   });
   const [saving, setSaving] = useState(false);
   const [isDoubanDropdownOpen, setIsDoubanDropdownOpen] = useState(false);
@@ -114,7 +114,7 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
         DoubanImageProxyType:
           config.SiteConfig.DoubanImageProxyType || 'direct',
         DoubanImageProxy: config.SiteConfig.DoubanImageProxy || '',
-        DisableYellowFilter: config.SiteConfig.DisableYellowFilter || false,
+        
       });
     }
   }, [config]);
@@ -509,47 +509,7 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
         />
       </div>
 
-      {/* 禁用黄色过滤器 */}
-      <div>
-        <div className='flex items-center justify-between'>
-          <label
-            className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${isUpstashStorage ? 'opacity-50' : ''
-              }`}
-          >
-            禁用黄色过滤器
-            {isUpstashStorage && (
-              <span className='ml-2 text-xs text-gray-500 dark:text-gray-400'>
-                (请通过环境变量修改)
-              </span>
-            )}
-          </label>
-          <button
-            type='button'
-            onClick={() =>
-              !isUpstashStorage &&
-              setSiteSettings((prev) => ({
-                ...prev,
-                DisableYellowFilter: !prev.DisableYellowFilter,
-              }))
-            }
-            disabled={isUpstashStorage}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 ${siteSettings.DisableYellowFilter
-                ? 'bg-blue-400'
-                : 'bg-gray-200 dark:bg-gray-700'
-              } ${isUpstashStorage
-                ? 'opacity-50 cursor-not-allowed'
-                : ''
-              }`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${siteSettings.DisableYellowFilter
-                  ? 'translate-x-6'
-                  : 'translate-x-1'
-                }`}
-            />
-          </button>
-        </div>
-      </div>
+      
 
       {/* 操作按钮 */}
       <div className='flex justify-end'>

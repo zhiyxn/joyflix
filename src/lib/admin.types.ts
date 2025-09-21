@@ -8,7 +8,7 @@ export interface AdminConfig {
     DoubanProxy: string;
     DoubanImageProxyType: string;
     DoubanImageProxy: string;
-    DisableYellowFilter: boolean;
+    
   };
   UserConfig: {
     Users: {

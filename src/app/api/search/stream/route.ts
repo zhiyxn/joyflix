@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 import { getCacheTime, getConfig } from '@/lib/config';
 import { searchAndFindFromApi } from '@/lib/downstream-stream';
 import { SearchResult } from '@/lib/types';
-import { yellowWords } from '@/lib/yellow';
+
 
 export const runtime = 'edge';
 
@@ -31,11 +31,7 @@ export async function GET(request: Request) {
     // 查找第一个未被过滤的有效结果
     const firstValidResult = results.find(result => {
       if (!result) return false;
-      // 应用关键词过滤
-      if (config.SiteConfig.DisableYellowFilter || !yellowWords.some((word: string) => (result.type_name || '').replace(/[()]/g, '').includes(word))) {
-        return true;
-      }
-      return false;
+      return true; // Always consider it a valid result after removing yellow filter
     });
 
     if (firstValidResult) {

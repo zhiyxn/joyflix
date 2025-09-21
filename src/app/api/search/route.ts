@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 
 import { getCacheTime, getConfig } from '@/lib/config';
 import { searchFromApi } from '@/lib/downstream';
-import { yellowWords } from '@/lib/yellow';
+
 
 export const runtime = 'edge';
 
@@ -48,12 +48,7 @@ export async function GET(request: Request) {
       .filter((result) => result.status === 'fulfilled')
       .map((result) => (result as PromiseFulfilledResult<any>).value);
     let flattenedResults = successResults.flat();
-    if (!config.SiteConfig.DisableYellowFilter) {
-      flattenedResults = flattenedResults.filter((result) => {
-        const typeName = result.type_name || '';
-        return !yellowWords.some((word: string) => typeName.replace(/[()]/g, '').includes(word));
-      });
-    }
+    
     const cacheTime = await getCacheTime();
 
     return NextResponse.json(

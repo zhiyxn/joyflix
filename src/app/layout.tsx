@@ -58,8 +58,6 @@ export default async function RootLayout({
   let doubanImageProxyType =
     process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE || 'img3';
   let doubanImageProxy = process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY || '';
-  let disableYellowFilter =
-    process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true';
   let customCategories = (RuntimeConfig as any).custom_category?.map((category: any) => ({
       name: 'name' in category ? category.name : '',
       type: category.type,
@@ -73,7 +71,6 @@ export default async function RootLayout({
     doubanProxy = config.SiteConfig.DoubanProxy;
     doubanImageProxyType = config.SiteConfig.DoubanImageProxyType;
     doubanImageProxy = config.SiteConfig.DoubanImageProxy;
-    disableYellowFilter = config.SiteConfig.DisableYellowFilter;
     customCategories = config.CustomCategories.filter(
       (category) => !category.disabled
     ).map((category) => ({
@@ -90,7 +87,6 @@ export default async function RootLayout({
     DOUBAN_PROXY: doubanProxy,
     DOUBAN_IMAGE_PROXY_TYPE: doubanImageProxyType,
     DOUBAN_IMAGE_PROXY: doubanImageProxy,
-    DISABLE_YELLOW_FILTER: disableYellowFilter,
     CUSTOM_CATEGORIES: customCategories,
   };
 
