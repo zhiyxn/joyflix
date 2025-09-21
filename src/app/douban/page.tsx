@@ -125,9 +125,9 @@ function DoubanPageClient() {
         if (firstCategory) setSecondarySelection(firstCategory.query);
       }
     } else {
-      if (type === 'movie') { setPrimarySelection('热门电影'); setSecondarySelection('movie'); }
-      else if (type === 'tv') { setPrimarySelection('最近热门'); setSecondarySelection('tv'); }
-      else if (type === 'show') { setPrimarySelection('最近热门'); setSecondarySelection('show'); }
+      if (type === 'movie') { setPrimarySelection('热门'); setSecondarySelection('全部'); }
+      else if (type === 'tv') { setPrimarySelection(''); setSecondarySelection('tv'); }
+      else if (type === 'show') { setPrimarySelection(''); setSecondarySelection('show'); }
       else if (type === 'anime') { setPrimarySelection('每日放送'); setSecondarySelection('全部'); }
       else { setPrimarySelection(''); setSecondarySelection('全部'); }
     }
