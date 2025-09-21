@@ -159,7 +159,7 @@ networks:
 | NEXT_PUBLIC_DOUBAN_PROXY            | 自定义豆瓣数据代理 URL                       | url prefix                       | (空)                                                                                                                       |
 | NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE | 豆瓣图片代理类型                             | 见下方                           | direct                                                                                                                     |
 | NEXT_PUBLIC_DOUBAN_IMAGE_PROXY      | 自定义豆瓣图片代理 URL                       | url prefix                       | (空)                                                                                                                       |
-| NEXT_PUBLIC_DISABLE_YELLOW_FILTER   | 关闭色情内容过滤                             | true/false                       | false                                                                                                                      |
+
 | NEXT_PUBLIC_BASE_URL                | 搜索推荐数据库获取值接口URL                     | https://xxx.com                             | 空    
                         
 NEXT_PUBLIC_DOUBAN_PROXY_TYPE 选项解释：
@@ -220,12 +220,10 @@ NEXT_PUBLIC_BASE_URL 选项解释：
   - `type`：分类类型，支持 `movie`（电影）或 `tv`（电视剧）
   - `query`：搜索关键词，用于在豆瓣 API 中搜索相关内容
 
-custom_category 支持的自定义分类已知如下：
+custom_category 支持的自定义分类如下：
 
 - movie：热门、最新、经典、豆瓣高分、冷门佳片、华语、欧美、韩国、日本、动作、喜剧、爱情、科幻、悬疑、恐怖、治愈
 - tv：热门、美剧、英剧、韩剧、日剧、国产剧、港剧、日本动画、综艺、纪录片
-
-也可输入如 "哈利波特" 效果等同于豆瓣搜索
 
 支持标准的苹果 CMS V10 API 格式。
 
@@ -234,9 +232,6 @@ custom_category 支持的自定义分类已知如下：
 
 配合 [OrionTV](https://github.com/zimplexing/OrionTV) 在 TV 上使用
 
-### 部署要求
-
-1. **设置环境变量 `PASSWORD`**：为您的实例设置一个强密码
 
 ## 技术
 
