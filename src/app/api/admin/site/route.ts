@@ -33,19 +33,11 @@ export async function POST(request: NextRequest) {
       Announcement,
       SearchDownstreamMaxPage,
       SiteInterfaceCacheTime,
-      DoubanProxyType,
-      DoubanProxy,
-      DoubanImageProxyType,
-      DoubanImageProxy,
     } = body as {
       SiteName: string;
       Announcement: string;
       SearchDownstreamMaxPage: number;
       SiteInterfaceCacheTime: number;
-      DoubanProxyType: string;
-      DoubanProxy: string;
-      DoubanImageProxyType: string;
-      DoubanImageProxy: string;
     };
 
     // 参数校验
@@ -53,11 +45,7 @@ export async function POST(request: NextRequest) {
       typeof SiteName !== 'string' ||
       typeof Announcement !== 'string' ||
       typeof SearchDownstreamMaxPage !== 'number' ||
-      typeof SiteInterfaceCacheTime !== 'number' ||
-      typeof DoubanProxyType !== 'string' ||
-      typeof DoubanProxy !== 'string' ||
-      typeof DoubanImageProxyType !== 'string' ||
-      typeof DoubanImageProxy !== 'string'
+      typeof SiteInterfaceCacheTime !== 'number'
     ) {
       return NextResponse.json({ error: '参数格式错误' }, { status: 400 });
     }
@@ -78,14 +66,11 @@ export async function POST(request: NextRequest) {
 
     // 更新缓存中的站点设置
     adminConfig.SiteConfig = {
+      ...adminConfig.SiteConfig,
       SiteName,
       Announcement,
       SearchDownstreamMaxPage,
       SiteInterfaceCacheTime,
-      DoubanProxyType,
-      DoubanProxy,
-      DoubanImageProxyType,
-      DoubanImageProxy,
     };
 
     // 写入数据库

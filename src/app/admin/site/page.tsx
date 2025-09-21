@@ -2,10 +2,6 @@
 
 'use client';
 
-import {
-  Check,
-  ChevronDown,
-} from 'lucide-react';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 
@@ -53,10 +49,6 @@ interface SiteConfig {
   Announcement: string;
   SearchDownstreamMaxPage: number;
   SiteInterfaceCacheTime: number;
-  DoubanProxyType: string;
-  DoubanProxy: string;
-  DoubanImageProxyType: string;
-  DoubanImageProxy: string;
   
 }
 
@@ -67,39 +59,9 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
     Announcement: '',
     SearchDownstreamMaxPage: 1,
     SiteInterfaceCacheTime: 7200,
-    DoubanProxyType: 'direct',
-    DoubanProxy: '',
-    DoubanImageProxyType: 'direct',
-    DoubanImageProxy: '',
     
   });
   const [saving, setSaving] = useState(false);
-  const [isDoubanDropdownOpen, setIsDoubanDropdownOpen] = useState(false);
-  const [isDoubanImageProxyDropdownOpen, setIsDoubanImageProxyDropdownOpen] =
-    useState(false);
-
-  const doubanDataSourceOptions = [
-    { value: 'direct', label: '直连（服务器直接请求豆瓣）' },
-    { value: 'cors-proxy-zwei', label: '豆瓣 CDN' },
-    {
-      value: 'cmliussss-cdn-tencent',
-      label: '豆瓣 CDN（腾讯云）',
-    },
-    { value: 'cmliussss-cdn-ali', label: '豆瓣 CDN（阿里云）' },
-    { value: 'custom', label: '自定义代理' },
-  ];
-
-  const doubanImageProxyTypeOptions = [
-    { value: 'direct', label: '直连（浏览器直接请求豆瓣）' },
-    { value: 'server', label: '服务器代理（由服务器代理请求豆瓣）' },
-    { value: 'img3', label: '豆瓣精品 CDN（官方）' },
-    {
-      value: 'cmliussss-cdn-tencent',
-      label: '豆瓣 CDN（腾讯云）',
-    },
-    { value: 'cmliussss-cdn-ali', label: '豆瓣 CDN（阿里云）' },
-    { value: 'custom', label: '自定义代理' },
-  ];
 
   const isUpstashStorage =
     typeof window !== 'undefined' &&
@@ -109,67 +71,10 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
     if (config?.SiteConfig) {
       setSiteSettings({
         ...config.SiteConfig,
-        DoubanProxyType: config.SiteConfig.DoubanProxyType || 'direct',
-        DoubanProxy: config.SiteConfig.DoubanProxy || '',
-        DoubanImageProxyType:
-          config.SiteConfig.DoubanImageProxyType || 'direct',
-        DoubanImageProxy: config.SiteConfig.DoubanImageProxy || '',
         
       });
     }
   }, [config]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isDoubanDropdownOpen) {
-        const target = event.target as Element;
-        if (!target.closest('[data-dropdown="douban-datasource"]')) {
-          setIsDoubanDropdownOpen(false);
-        }
-      }
-    };
-
-    if (isDoubanDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () =>
-        document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [isDoubanDropdownOpen]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isDoubanImageProxyDropdownOpen) {
-        const target = event.target as Element;
-        if (!target.closest('[data-dropdown="douban-image-proxy"]')) {
-          setIsDoubanImageProxyDropdownOpen(false);
-        }
-      }
-    };
-
-    if (isDoubanImageProxyDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () =>
-        document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [isDoubanImageProxyDropdownOpen]);
-
-  const handleDoubanDataSourceChange = (value: string) => {
-    if (!isUpstashStorage) {
-      setSiteSettings((prev) => ({
-        ...prev,
-        DoubanProxyType: value,
-      }));
-    }
-  };
-
-  const handleDoubanImageProxyChange = (value: string) => {
-    if (!isUpstashStorage) {
-      setSiteSettings((prev) => ({
-        ...prev,
-        DoubanImageProxyType: value,
-      }));
-    }
-  };
 
   const handleSave = async () => {
     try {
@@ -262,219 +167,10 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
         />
       </div>
 
-      {/* 豆瓣数据源设置 */}
-      <div className='space-y-3'>
-        <div>
-          <label
-            className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${
-              isUpstashStorage ? 'opacity-50' : ''
-            }`}
-          >
-            豆瓣数据代理
-            {isUpstashStorage && (
-              <span className='ml-2 text-xs text-gray-500 dark:text-gray-400'>
-                (请通过环境变量修改)
-              </span>
-            )}
-          </label>
-          <div className='relative' data-dropdown='douban-datasource'>
-            <button
-              type='button'
-              onClick={() => setIsDoubanDropdownOpen(!isDoubanDropdownOpen)}
-              disabled={isUpstashStorage}
-              className={`w-full px-3 py-2.5 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm hover:border-gray-400 dark:hover:border-gray-500 text-left ${
-                isUpstashStorage
-                  ? 'opacity-50 cursor-not-allowed'
-                  : ''
-              }`}
-            >
-              {
-                doubanDataSourceOptions.find(
-                  (option) => option.value === siteSettings.DoubanProxyType
-                )?.label
-              }
-            </button>
-
-            <div className='absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none'>
-              <ChevronDown
-                className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform duration-200 ${
-                  isDoubanDropdownOpen ? 'rotate-180' : ''
-                }`}
-              />
-            </div>
-
-            {isDoubanDropdownOpen && !isUpstashStorage && (
-              <div className='absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-auto'>
-                {doubanDataSourceOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type='button'
-                    onClick={() => {
-                      handleDoubanDataSourceChange(option.value);
-                      setIsDoubanDropdownOpen(false);
-                    }}
-                    className={`w-full px-3 py-2.5 text-left text-sm transition-colors duration-150 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                      siteSettings.DoubanProxyType === option.value
-                        ? 'bg-blue-50 dark:bg-blue-800/20 text-blue-500 dark:text-blue-300'
-                        : 'text-gray-900 dark:text-gray-100'
-                    }`}
-                  >
-                    <span className='truncate'>{option.label}</span>
-                    {siteSettings.DoubanProxyType === option.value && (
-                      <Check className='w-4 h-4 text-blue-500 dark:text-blue-300 flex-shrink-0 ml-2' />
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {siteSettings.DoubanProxyType === 'custom' && (
-          <div>
-            <label
-              className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${
-                isUpstashStorage ? 'opacity-50' : ''
-              }`}
-            >
-              豆瓣代理地址
-            </label>
-            <input
-              type='text'
-              placeholder='例如: https://proxy.example.com/fetch?url='
-              value={siteSettings.DoubanProxy}
-              onChange={(e) =>
-                !isUpstashStorage &&
-                setSiteSettings((prev) => ({
-                  ...prev,
-                  DoubanProxy: e.target.value,
-                }))
-              }
-              disabled={isUpstashStorage}
-              className={`w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm hover:border-gray-400 dark:hover:border-gray-500 ${
-                isUpstashStorage
-                  ? 'opacity-50 cursor-not-allowed'
-                  : ''
-              }`}
-            />
-            <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
-              自定义代理服务器地址
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* 豆瓣图片代理设置 */}
-      <div className='space-y-3'>
-        <div>
-          <label
-            className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${
-              isUpstashStorage ? 'opacity-50' : ''
-            }`}
-          >
-            豆瓣图片代理
-            {isUpstashStorage && (
-              <span className='ml-2 text-xs text-gray-500 dark:text-gray-400'>
-                (请通过环境变量修改)
-              </span>
-            )}
-          </label>
-          <div className='relative' data-dropdown='douban-image-proxy'>
-            <button
-              type='button'
-              onClick={() =>
-                setIsDoubanImageProxyDropdownOpen(
-                  !isDoubanImageProxyDropdownOpen
-                )
-              }
-              disabled={isUpstashStorage}
-              className={`w-full px-3 py-2.5 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm hover:border-gray-400 dark:hover:border-gray-500 text-left ${
-                isUpstashStorage
-                  ? 'opacity-50 cursor-not-allowed'
-                  : ''
-              }`}
-            >
-              {
-                doubanImageProxyTypeOptions.find(
-                  (option) => option.value === siteSettings.DoubanImageProxyType
-                )?.label
-              }
-            </button>
-
-            <div className='absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none'>
-              <ChevronDown
-                className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform duration-200 ${
-                  isDoubanImageProxyDropdownOpen ? 'rotate-180' : ''
-                }`}
-              />
-            </div>
-
-            {isDoubanImageProxyDropdownOpen &&
-              !isUpstashStorage && (
-                <div className='absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-auto'>
-                  {doubanImageProxyTypeOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      type='button'
-                      onClick={() => {
-                        handleDoubanImageProxyChange(option.value);
-                        setIsDoubanImageProxyDropdownOpen(false);
-                      }}
-                      className={`w-full px-3 py-2.5 text-left text-sm transition-colors duration-150 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                        siteSettings.DoubanImageProxyType === option.value
-                          ? 'bg-blue-50 dark:bg-blue-800/20 text-blue-500 dark:text-blue-300'
-                          : 'text-gray-900 dark:text-gray-100'
-                      }`}
-                    >
-                      <span className='truncate'>{option.label}</span>
-                      {siteSettings.DoubanImageProxyType === option.value && (
-                        <Check className='w-4 h-4 text-blue-500 dark:text-blue-300 flex-shrink-0 ml-2' />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-          </div>
-        </div>
-
-        {siteSettings.DoubanImageProxyType === 'custom' && (
-          <div>
-            <label
-              className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${
-                isUpstashStorage ? 'opacity-50' : ''
-              }`}
-            >
-              豆瓣图片代理地址
-            </label>
-            <input
-              type='text'
-              placeholder='例如: https://proxy.example.com/fetch?url='
-              value={siteSettings.DoubanImageProxy}
-              onChange={(e) =>
-                !isUpstashStorage &&
-                setSiteSettings((prev) => ({
-                  ...prev,
-                  DoubanImageProxy: e.target.value,
-                }))
-              }
-              disabled={isUpstashStorage}
-              className={`w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm hover:border-gray-400 dark:hover:border-gray-500 ${
-                isUpstashStorage
-                  ? 'opacity-50 cursor-not-allowed'
-                  : ''
-              }`}
-            />
-            <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
-              自定义图片代理服务器地址
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* 搜索接口可拉取最大页数 */}
+      {/* 搜索接口拉取页数 */}
       <div>
         <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-          搜索接口可拉取最大页数
+          搜索接口拉取页数
         </label>
         <input
           type='number'
@@ -490,10 +186,10 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
         />
       </div>
 
-      {/* 站点接口缓存时间 */}
+      {/* 接口缓存时间 */}
       <div>
         <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-          站点接口缓存时间（秒）
+          接口缓存时间（秒）
         </label>
         <input
           type='number'
@@ -576,7 +272,7 @@ function SiteConfigPageClient() {
             </div>
             <div className='bg-white/70 dark:bg-gray-800/50 rounded-2xl shadow-lg backdrop-blur-lg border border-gray-200/50 dark:border-gray-700/50 p-6'>
               <div className='space-y-6'>
-                {Array.from({ length: 7 }).map((_, index) => (
+                {Array.from({ length: 4 }).map((_, index) => (
                   <div
                     key={index}
                     className='h-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse'

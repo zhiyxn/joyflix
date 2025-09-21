@@ -204,7 +204,7 @@ const VideoSourceConfig = ({
       });
   };
 
-  const testSingleSource = async (source: DataSource) => {
+  const testSingleSource = async (source: DataSource): Promise<{ speed: number, status: 'success' | 'failure' }> => {
     setTestResults(prev => ({ ...prev, [source.key]: 'testing' }));
     setSpeeds(prev => ({ ...prev, [source.key]: null }));
     setTestErrorMessages(prev => ({ ...prev, [source.key]: null }));
@@ -218,6 +218,7 @@ const VideoSourceConfig = ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetUrl: `${source.api}?wd=test` }),
+        signal: controller.signal,
       });
 
       const result = await response.json();
@@ -229,14 +230,17 @@ const VideoSourceConfig = ({
         setTestResults(prev => ({ ...prev, [source.key]: 'failure' }));
         setTestErrorMessages(prev => ({ ...prev, [source.key]: errorMessage }));
         setSpeeds(prev => ({ ...prev, [source.key]: Infinity }));
+        return { speed: Infinity, status: 'failure' };
       } else {
         setTestResults(prev => ({ ...prev, [source.key]: 'success' }));
         setSpeeds(prev => ({ ...prev, [source.key]: duration }));
+        return { speed: duration, status: 'success' };
       }
     } catch (error) {
       setTestResults(prev => ({ ...prev, [source.key]: 'failure' }));
       setTestErrorMessages(prev => ({ ...prev, [source.key]: `测试请求失败: ${(error as Error).message}` }));
       setSpeeds(prev => ({ ...prev, [source.key]: Infinity }));
+      return { speed: Infinity, status: 'failure' };
     } finally {
       clearTimeout(timeoutId);
     }
@@ -248,27 +252,31 @@ const VideoSourceConfig = ({
     setSpeeds({});
     setTestErrorMessages({});
     const enabledSources = sources.filter(s => !s.disabled);
+    const results: { key: string; speed: number; status: 'success' | 'failure' }[] = [];
+
     for (const source of enabledSources) {
-      await testSingleSource(source);
+      const result = await testSingleSource(source);
+      results.push({ key: source.key, ...result });
       await new Promise(resolve => setTimeout(resolve, 200)); // 在请求之间添加 200 毫秒的延迟
     }
     setIsTesting(false);
 
-    const sortedSources = [...sources].sort((a, b) => {
-      const statusA = testResults[a.key];
-      const statusB = testResults[b.key];
+    const speedMap = new Map(results.map(r => [r.key, r.speed]));
+    const statusMap = new Map(results.map(r => [r.key, r.status]));
 
-      // Failures always go to the end
+    const sortedSources = [...sources].sort((a, b) => {
+      const statusA = statusMap.get(a.key);
+      const statusB = statusMap.get(b.key);
+
       if (statusA === 'failure' && statusB !== 'failure') {
-        return 1; // a is failure, b is not, so a comes after b
+        return 1;
       }
       if (statusA !== 'failure' && statusB === 'failure') {
-        return -1; // a is not failure, b is, so a comes before b
+        return -1;
       }
 
-      // If both are failures or both are not failures, sort by speed
-      const speedA = speeds[a.key] ?? Infinity;
-      const speedB = speeds[b.key] ?? Infinity;
+      const speedA = speedMap.get(a.key) ?? Infinity;
+      const speedB = speedMap.get(b.key) ?? Infinity;
       return speedA - speedB;
     });
     setSources(sortedSources);

@@ -21,7 +21,6 @@ export async function GET(
 
     const description = $('span[property="v:summary"]').text().replace(/\s+/g, ' ').trim() ?? '';
     const genres = $('span[property="v:genre"]').map((i, el) => $(el).text()).get().join(',');
-    const runtime = $('span[property="v:runtime"]').text().trim() ?? '';
     const year = $('span.year').text().replace('(', '').replace(')', '') ?? '';
 
     let country = '';
@@ -63,7 +62,6 @@ export async function GET(
     return NextResponse.json({
       description,
       genre: genres,
-      runtime,
       country,
       year,
       recommendations,

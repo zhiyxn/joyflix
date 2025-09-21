@@ -232,7 +232,6 @@ function DetailPageClient() {
               class: doubanData.genre || initialClass || undefined,
               desc: doubanData.description || initialDesc || undefined,
               country: doubanData.country || undefined,
-              runtime: doubanData.runtime || undefined,
               recommendations: doubanData.recommendations || [],
               trailerUrl: doubanData.trailerUrl || undefined,
               episodes: [],
@@ -369,7 +368,6 @@ function DetailPageClient() {
           if (!newDetail.class && videoDetailToSet.class) newDetail.class = videoDetailToSet.class;
           if (!newDetail.desc && videoDetailToSet.desc) newDetail.desc = videoDetailToSet.desc;
           if (!newDetail.country && videoDetailToSet.country) newDetail.country = videoDetailToSet.country;
-          if (!newDetail.runtime && videoDetailToSet.runtime) newDetail.runtime = videoDetailToSet.runtime;
           if ((!newDetail.recommendations || newDetail.recommendations.length === 0) && videoDetailToSet.recommendations && videoDetailToSet.recommendations.length > 0) {
             newDetail.recommendations = videoDetailToSet.recommendations;
           }
@@ -572,8 +570,8 @@ function DetailPageClient() {
                   {rate}
                 </span>
               )}
-              {/* Separator after Rate, if Year, Class, Country, or Runtime exists */}
-              {(rate && (detail?.year || detail?.class || detail?.country || detail?.runtime)) && <span className='hidden md:inline'>|</span>}
+              {/* Separator after Rate, if Year, Class, or Country exists */}
+              {(rate && (detail?.year || detail?.class || detail?.country)) && <span className='hidden md:inline'>|</span>}
 
               {/* Year - Second */}
               {detail?.year ? (
@@ -581,8 +579,8 @@ function DetailPageClient() {
                   {detail.year}
                 </span>
               ) : (isLoadingApi ? <div className='h-6 bg-gray-500 dark:bg-gray-400 rounded w-16 animate-pulse'></div> : null)}
-              {/* Separator after Year, if Class, Country, or Runtime exists */}
-              {(detail?.year && (detail?.class || detail?.country || detail?.runtime)) && <span className='hidden md:inline'>|</span>}
+              {/* Separator after Year, if Class or Country exists */}
+              {(detail?.year && (detail?.class || detail?.country)) && <span className='hidden md:inline'>|</span>}
 
               {/* Class - Third */}
               {detail?.class ? (
@@ -590,8 +588,8 @@ function DetailPageClient() {
                   {detail.class}
                 </span>
               ) : (isLoadingApi ? <div className='h-6 bg-gray-500 dark:bg-gray-400 rounded w-24 animate-pulse'></div> : null)}
-              {/* Separator after Class, if Country or Runtime exists */}
-              {(detail?.class && (detail?.country || detail?.runtime)) && <span className='hidden md:inline'>|</span>}
+              {/* Separator after Class, if Country exists */}
+              {(detail?.class && detail?.country) && <span className='hidden md:inline'>|</span>}
 
               {/* Country - Fourth */}
               {detail?.country ? (
@@ -599,15 +597,7 @@ function DetailPageClient() {
                   {detail.country}
                 </span>
               ) : (isLoadingApi ? <div className='h-6 bg-gray-500 dark:bg-gray-400 rounded w-24 animate-pulse'></div> : null)}
-              {/* Separator after Country, if Runtime exists */}
-              {(detail?.country && detail?.runtime) && <span className='hidden md:inline'>|</span>}
-
-              {/* Runtime - Fifth */}
-              {detail?.runtime ? (
-                <span className='px-2 py-1 border border-gray-400/60 rounded-md text-xs font-medium text-gray-600 dark:text-gray-300'>
-                  {detail.runtime}
-                </span>
-              ) : (isLoadingApi ? <div className='h-6 bg-gray-500 dark:bg-gray-400 rounded w-24 animate-pulse'></div> : null)}
+              
             </div>
 
             <div className='mb-6 flex flex-row items-center gap-4'>
