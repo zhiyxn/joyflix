@@ -54,7 +54,17 @@ export default function SearchSuggestions({
             type: 'related' as const,
           })
         );
-        setSuggestions(apiSuggestions);
+
+        // 新增：过滤标题中含有“电影解说”、“剧情解说”、“预告片”、“解说”的搜索建议
+        const filterKeywords = ['电影解说', '剧情解说', '预告片', '解说'];
+        const filteredSuggestions = apiSuggestions.filter(
+          (suggestion: SuggestionItem) =>
+            !filterKeywords.some((keyword) =>
+              suggestion.text.includes(keyword)
+            )
+        );
+
+        setSuggestions(filteredSuggestions);
         setSelectedIndex(-1);
       }
     } catch (err: unknown) {
