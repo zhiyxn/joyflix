@@ -35,7 +35,8 @@ const config: Config = {
           350: '#70a9f9', // A shade between 300 and 400
           400: '#60a5fa',
         },
-                'joyflix-blue': '#7ac0e0',
+                        'joyflix-blue': '#7ac0e0',
+        'joyflix-blue-dark': '#6a9ecf',
         dark: '#222222',
       },
       keyframes: {
