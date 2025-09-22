@@ -570,8 +570,6 @@ function DetailPageClient() {
                   {rate}
                 </span>
               )}
-              {/* Separator after Rate, if Year, Class, or Country exists */}
-              {(rate && (detail?.year || detail?.class || detail?.country)) && <span className='hidden md:inline'>|</span>}
 
               {/* Year - Second */}
               {detail?.year ? (
@@ -579,8 +577,6 @@ function DetailPageClient() {
                   {detail.year}
                 </span>
               ) : (isLoadingApi ? <div className='h-6 bg-gray-500 dark:bg-gray-400 rounded w-16 animate-pulse'></div> : null)}
-              {/* Separator after Year, if Class or Country exists */}
-              {(detail?.year && (detail?.class || detail?.country)) && <span className='hidden md:inline'>|</span>}
 
               {/* Class - Third */}
               {detail?.class ? (
@@ -588,8 +584,6 @@ function DetailPageClient() {
                   {detail.class}
                 </span>
               ) : (isLoadingApi ? <div className='h-6 bg-gray-500 dark:bg-gray-400 rounded w-24 animate-pulse'></div> : null)}
-              {/* Separator after Class, if Country exists */}
-              {(detail?.class && detail?.country) && <span className='hidden md:inline'>|</span>}
 
               {/* Country - Fourth */}
               {detail?.country ? (

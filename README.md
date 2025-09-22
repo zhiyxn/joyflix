@@ -70,41 +70,6 @@
 
 ### Docker 部署
 
-#### 1. 直接运行（最简单，localstorage）
-
-```bash
-# 拉取预构建镜像
-# 推荐使用具体版本号标签，确保稳定性
-docker pull ghcr.io/lunatechlab/moontv:1.0.4
-# 或拉取最新版本
-docker pull ghcr.io/lunatechlab/moontv:latest
-
-# 运行容器
-# -d: 后台运行  -p: 映射端口 3000 -> 3000
-docker run -d --name moontv -p 3000:3000 --env PASSWORD=your_password ghcr.io/lunatechlab/moontv:latest
-```
-
-## Docker Compose 最佳实践
-
-若你使用 docker compose 部署，以下是一些 compose 示例
-
-### local storage 版本
-
-```yaml
-services:
-  moontv-core:
-    image: ghcr.io/lunatechlab/moontv:latest
-    container_name: moontv-core
-    restart: unless-stopped
-    ports:
-      - '3000:3000'
-    environment:
-      - PASSWORD=your_password
-    # 如需自定义配置，可挂载文件
-    # volumes:
-    #   - ./config.json:/app/config.json:ro
-```
-
 ### Redis 版本（推荐，多账户数据隔离，跨设备同步）
 
 ```yaml

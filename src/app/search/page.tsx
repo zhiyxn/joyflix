@@ -322,7 +322,7 @@ const SearchPageClient: React.FC = () => {
                 value={searchQuery}
                 onChange={handleInputChange}
                 onFocus={handleInputFocus}
-                placeholder="剧荒别犯难，快乐搜出来～"
+                placeholder="剧荒别犯难，好剧搜出来～"
                 className="w-full h-12 rounded-full bg-white/50 backdrop-blur-md py-3 pl-10 pr-4 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:bg-white/80 border border-gray-200/50 shadow-sm dark:bg-gray-800/50 dark:text-gray-300 dark:placeholder-gray-500 dark:focus:bg-gray-700/80 dark:border-gray-700"
               />
 

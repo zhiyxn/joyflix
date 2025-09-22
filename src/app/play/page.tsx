@@ -240,7 +240,37 @@ function PlayPageClient() {
   ): Promise<SearchResult> => {
     if (sources.length === 1) return sources[0];
 
-    const allResults: Array<{ source: SearchResult; testResult: { quality: string; loadSpeed: string; pingTime: number } } | null> = [];
+    // 第一阶段：快速Ping测试
+    console.log('开始第一阶段：快速Ping测试');
+    const PING_THRESHOLD = 800; // 800毫秒
+    const pingPromises = sources.map(source => {
+        const episodeUrl = source.episodes?.[0];
+        if (!episodeUrl) return Promise.resolve({ source, ping: Infinity });
+        const start = performance.now();
+        // 使用HEAD请求以获得更准确的ping时间
+        return fetch(episodeUrl, { method: 'HEAD', mode: 'no-cors' })
+            .then(() => ({ source, ping: performance.now() - start }))
+            .catch(() => ({ source, ping: performance.now() - start })); // 如果HEAD请求失败（例如CORS），则回退到计时
+    });
+
+    const pingResults = await Promise.all(pingPromises);
+    const survivingSources = pingResults
+        .filter(result => result.ping < PING_THRESHOLD)
+        .sort((a, b) => a.ping - b.ping)
+        .map(result => result.source);
+
+    console.log(`第一阶段完成: ${survivingSources.length} / ${sources.length} 个源通过Ping测试.`);
+
+    if (survivingSources.length === 0) {
+        console.warn('没有源通过Ping测试，将使用第一个原始源作为备用。');
+        return sources[0];
+    }
+    if (survivingSources.length === 1) {
+        return survivingSources[0];
+    }
+
+    // 第二阶段：对通过的源进行完整测试
+    const allResults: Array<{ source: SearchResult; testResult: { quality: string; loadSpeed: string; pingTime: number; speedJitter: number; } } | null> = [];
 
     const testSource = async (source: SearchResult) => {
       try {
@@ -250,7 +280,7 @@ function PlayPageClient() {
         }
         const episodeUrl =
           source.episodes.length > 1
-            ? source.episodes[1]
+            ? source.episodes[1] // 如果可能，使用靠后的集数进行测试
             : source.episodes[0];
         const testResult = await getVideoResolutionFromM3u8(episodeUrl);
         return { source, testResult };
@@ -261,99 +291,77 @@ function PlayPageClient() {
 
     if (isSerialSpeedTest) {
       // 串行测速逻辑
-      console.log('正在使用串行测速（每次2个源）');
-      const chunkSize = 2;
-      for (let i = 0; i < sources.length; i += chunkSize) {
-        const chunk = sources.slice(i, i + chunkSize);
-        const chunkResults = await Promise.all(chunk.map(testSource));
-        allResults.push(...chunkResults);
-        await new Promise(resolve => setTimeout(resolve, 100)); // Add delay
+      console.log('开始第二阶段：完整测速（串行）');
+      for (const source of survivingSources) {
+          const result = await testSource(source);
+          allResults.push(result);
+          await new Promise(resolve => setTimeout(resolve, 100)); // 两次测试之间增加一个小的延迟
       }
     } else {
-      // 并行测速逻辑（原有逻辑）
-      console.log('正在使用并行测速（分为2批）');
-      const batchSize = Math.ceil(sources.length / 2);
-      for (let start = 0; start < sources.length; start += batchSize) {
-        const batchSources = sources.slice(start, start + batchSize);
-        const batchResults = await Promise.all(batchSources.map(testSource));
-        allResults.push(...batchResults);
+      // 并行测速逻辑
+      console.log('开始第二阶段：完整测速（并行分批）');
+      const batchSize = Math.ceil(survivingSources.length / 2);
+      for (let start = 0; start < survivingSources.length; start += batchSize) {
+          const batchSources = survivingSources.slice(start, start + batchSize);
+          const batchResults = await Promise.all(batchSources.map(testSource));
+          allResults.push(...batchResults);
       }
     }
 
-    // 等待所有测速完成，包含成功和失败的结果
-    // 保存所有测速结果到 precomputedVideoInfo，供 EpisodeSelector 使用（包含错误结果）
-    const newVideoInfoMap = new Map<
-      string,
-      {
-        quality: string;
-        loadSpeed: string;
-        pingTime: number;
-        hasError?: boolean;
-      }
-    >();
-    allResults.forEach((result, index) => {
-      const source = sources[index];
-      const sourceKey = `${source.source}-${source.id}`;
-
+    const newVideoInfoMap = new Map<string, any>();
+    allResults.forEach((result) => {
       if (result) {
-        // 成功的结果
+        const sourceKey = `${result.source.source}-${result.source.id}`;
         newVideoInfoMap.set(sourceKey, result.testResult);
       }
     });
 
-    // 过滤出成功的结果用于优选计算
-    const successfulResults = allResults.filter(Boolean) as Array<{ source: SearchResult; testResult: { quality: string; loadSpeed: string; pingTime: number } }>;
+    const successfulResults = allResults.filter(Boolean) as Array<{ source: SearchResult; testResult: { quality: string; loadSpeed: string; pingTime: number; speedJitter: number; } }>;
 
     setPrecomputedVideoInfo(newVideoInfoMap);
 
     if (successfulResults.length === 0) {
-      console.warn('所有播放源测速都失败，使用第一个播放源');
-      return sources[0];
+      console.warn('所有幸存的播放源测速都失败，使用第一个幸存源');
+      return survivingSources[0];
     }
 
-    // 找出所有有效速度的最大值，用于线性映射
     const validSpeeds = successfulResults
       .map((result) => {
         const speedStr = result.testResult.loadSpeed;
         if (speedStr === '未知' || speedStr === '测量中...') return 0;
-
         const match = speedStr.match(/^([\d.]+)\s*(KB\/s|MB\/s)$/);
         if (!match) return 0;
-
         const value = parseFloat(match[1]);
-        const unit = match[2];
-        return unit === 'MB/s' ? value * 1024 : value; // 统一转换为 KB/s
+        return match[2] === 'MB/s' ? value * 1024 : value;
       })
       .filter((speed) => speed > 0);
 
-    const maxSpeed = validSpeeds.length > 0 ? Math.max(...validSpeeds) : 1024; // 默认1MB/s作为基准
+    const maxSpeed = validSpeeds.length > 0 ? Math.max(...validSpeeds) : 1024;
 
-    // 找出所有有效延迟的最小值和最大值，用于线性映射
-    const validPings = successfulResults
-      .map((result) => result.testResult.pingTime)
-      .filter((ping) => ping > 0);
-
+    const validPings = successfulResults.map(r => r.testResult.pingTime).filter(p => p > 0);
     const minPing = validPings.length > 0 ? Math.min(...validPings) : 50;
     const maxPing = validPings.length > 0 ? Math.max(...validPings) : 1000;
 
-    // 计算每个结果的评分
+    const validJitters = successfulResults.map(r => r.testResult.speedJitter).filter(j => j > 0);
+    const maxJitter = validJitters.length > 0 ? Math.max(...validJitters) : 500;
+
     const resultsWithScore = successfulResults.map((result) => ({
       ...result,
       score: calculateSourceScore(
         result.testResult,
         maxSpeed,
         minPing,
-        maxPing
+        maxPing,
+        maxJitter
       ),
     }));
 
-    // 按综合评分排序，选择最佳播放源
     resultsWithScore.sort((a, b) => b.score - a.score);
 
     console.log('播放源评分排序结果:');
     resultsWithScore.forEach((result, index) => {
       console.log(
-        `${index + 1}. ${result.source.source_name} - 评分: ${result.score.toFixed(2)} (${result.testResult.quality}, ${result.testResult.loadSpeed}, ${result.testResult.pingTime}ms)`
+        `${index + 1}. ${result.source.source_name} - 评分: ${result.score.toFixed(2)} (画质: ${result.testResult.quality}, 速度: ${result.testResult.loadSpeed}, 延迟: ${result.testResult.pingTime}ms, 抖动: ${result.testResult.speedJitter.toFixed(2)}KB/s)`
       );
     });
 
@@ -366,101 +374,97 @@ function PlayPageClient() {
       quality: string;
       loadSpeed: string;
       pingTime: number;
+      speedJitter: number;
     },
     maxSpeed: number,
     minPing: number,
-    maxPing: number
+    maxPing: number,
+    maxJitter: number
   ): number => {
     let score = 0;
 
-    // 分辨率评分 (50% 权重) - 非线性调整
-    const qualityScore = (() => {
+    // --- 1. 分辨率评分 (权重: 35%) ---
+    let qualityScore = (() => {
       switch (testResult.quality) {
-        case '4K':
-          return 100; // 最高分，代表极致体验
-        case '2K':
-          return 90; // 从 1080P 到 2K 有显著提升，给予较高分数
-        case '1080P':
-          return 70; // 普遍接受的高清标准，与 2K/4K 拉开差距
-        case '720P':
-          return 45; // 从 1080P 到 720P 体验下降明显，分数下降幅度较大
-        case '480P':
-          return 20; // 勉强可接受的画质，分数较低
-        case 'SD':
-          return 5;  // 极低画质，几乎不推荐，分数非常低
-        default:
-          return 0;
+        case '4K': return 100;
+        case '2K': return 90;
+        case '1080P': return 75;
+        case '720P': return 50;
+        case '480P': return 25;
+        case 'SD': return 10;
+        default: return 0;
       }
     })();
-    score += qualityScore * 0.5;
 
-    // 下载速度评分 (30% 权重) - 基于最大速度线性映射
+    // --- 关联性判断: 速度是否支撑画质 ---
+    const requiredSpeed: { [quality: string]: number } = { // 单位 KB/s
+        '4K': 2500,    // 20 Mbps
+        '2K': 1875,    // 15 Mbps
+        '1080P': 1000, // 8 Mbps
+        '720P': 500,   // 4 Mbps
+    };
+    const speedStr = testResult.loadSpeed;
+    const match = speedStr.match(/^([\d.]+)\s*(KB\/s|MB\/s)$/);
+    let speedKBps = 0;
+    if (match) {
+        const value = parseFloat(match[1]);
+        speedKBps = match[2] === 'MB/s' ? value * 1024 : value;
+    }
+
+    const required = requiredSpeed[testResult.quality];
+    if (required && speedKBps > 0 && speedKBps < required) {
+        // 如果速度不足以支撑画质，画质分大打折扣
+        qualityScore *= 0.3; // 仅获得30%的画质分
+        console.log(`  - ${testResult.quality}速度不足(${speedKBps.toFixed(0)}KB/s < ${required}KB/s)，画质分被惩罚.`);
+    }
+    score += qualityScore * 0.35;
+
+    // --- 2. 下载速度评分 (权重: 35%) ---
     const speedScore = (() => {
-      const speedStr = testResult.loadSpeed;
-      if (speedStr === '未知' || speedStr === '测量中...') return 30;
-
-      // 解析速度值
-      const match = speedStr.match(/^([\d.]+)\s*(KB\/s|MB\/s)$/);
-      if (!match) return 30;
-
-      const value = parseFloat(match[1]);
-      const unit = match[2];
-      const speedKBps = unit === 'MB/s' ? value * 1024 : value;
-
-      // 基于最大速度线性映射，最高100分
-      const speedRatio = speedKBps / maxSpeed;
-      return Math.min(100, Math.max(0, speedRatio * 100));
+      if (speedKBps === 0) return 30; // 未知速度给一个基础分
+      // S型曲线评分，在达到2.5MB/s后增长放缓
+      const k = 0.0015;
+      const x0 = 2500; // 2.5 MB/s
+      return 100 / (1 + Math.exp(-k * (speedKBps - x0)));
     })();
-    score += speedScore * 0.3;
+    score += speedScore * 0.35;
 
-    // 网络延迟评分 (20% 权重) - 基于延迟范围线性映射
+    // --- 3. 网络延迟评分 (权重: 10%) ---
     const pingScore = (() => {
       const ping = testResult.pingTime;
-      if (ping <= 0) return 0; // 无效延迟给默认分
-
-      // 如果所有延迟都相同，给满分
+      if (ping <= 0) return 0;
       if (maxPing === minPing) return 100;
-
-      // 线性映射：最低延迟=100分，最高延迟=0分
       const pingRatio = (maxPing - ping) / (maxPing - minPing);
       return Math.min(100, Math.max(0, pingRatio * 100));
     })();
-    score += pingScore * 0.2;
+    score += pingScore * 0.10;
 
-    // --- 惩罚机制 ---
-    // 定义惩罚阈值和扣减比例（这些值可以根据实际情况调整）
-    const HIGH_PING_THRESHOLD_MS = 500; // 超过 500ms 的延迟开始惩罚
-    const LOW_SPEED_THRESHOLD_KBPS = 500; // 低于 500 KB/s 的速度开始惩罚
-    const HIGH_PING_PENALTY_FACTOR = 0.3; // 高延迟扣减 30% 的分数
-    const LOW_SPEED_PENALTY_FACTOR = 0.5; // 低速度扣减 50% 的分数
-
-    // 应用高延迟惩罚
-    if (testResult.pingTime > HIGH_PING_THRESHOLD_MS) {
-      score *= (1 - HIGH_PING_PENALTY_FACTOR);
-      console.log(`  - 应用高延迟惩罚: ${testResult.pingTime}ms > ${HIGH_PING_THRESHOLD_MS}ms`);
-    }
-
-    // 解析速度值（统一转换为 KB/s）
-    const speedValueKBps = (() => {
-      const speedStr = testResult.loadSpeed;
-      if (speedStr === '未知' || speedStr === '测量中...') return 0;
-      const match = speedStr.match(/^([\d.]+)\s*(KB\/s|MB\/s)$/);
-      if (!match) return 0;
-      const value = parseFloat(match[1]);
-      const unit = match[2];
-      return unit === 'MB/s' ? value * 1024 : value;
+    // --- 4. 稳定性评分 (权重: 20%) ---
+    const jitterScore = (() => {
+        if (testResult.speedJitter <= 0 || maxJitter <= 0) return 100; // 没有抖动或无法计算则为满分
+        // 抖动越小越好，线性反向评分
+        const jitterRatio = testResult.speedJitter / maxJitter;
+        return 100 * (1 - Math.min(1, jitterRatio));
     })();
+    score += jitterScore * 0.20;
 
-    // 应用低速度惩罚
-    if (speedValueKBps > 0 && speedValueKBps < LOW_SPEED_THRESHOLD_KBPS) {
-      score *= (1 - LOW_SPEED_PENALTY_FACTOR);
-      console.log(`  - 应用低速度惩罚: ${speedValueKBps}KB/s < ${LOW_SPEED_THRESHOLD_KBPS}KB/s`);
+    // --- 惩罚机制: 平滑延迟惩罚 ---
+    const pingPenalty = (() => {
+        const ping = testResult.pingTime;
+        const goodPing = 150; // 150毫秒
+        const badPing = 600; // 600毫秒
+        if (ping <= goodPing) return 1.0; // 无惩罚
+        if (ping >= badPing) return 0.7; // 最大惩罚 (30%)
+        // 在[150, 600]区间内线性惩罚
+        const penaltyFactor = (ping - goodPing) / (badPing - goodPing);
+        return 1.0 - (penaltyFactor * 0.3);
+    })();
+    if (pingPenalty < 1.0) {
+        console.log(`  - 延迟(${testResult.pingTime}ms)触发平滑惩罚，分数乘以${pingPenalty.toFixed(2)}`);
+        score *= pingPenalty;
     }
 
-    // 确保分数不会低于 0
-    score = Math.max(0, score);
-
-    return Math.round(score * 100) / 100; // 保留两位小数
+    return Math.max(0, score); // 确保分数不为负
   };
 
   // 更新视频地址
@@ -2583,10 +2587,6 @@ function PlayPageClient() {
                     <span className='border border-gray-500/60 px-2 py-[1px] rounded'>
                       {detail?.year || videoYear}
                     </span>
-                    {/* Separator after Year, if Class, Source Name, or Type Name exists */}
-                    {(detail?.class || detail?.source_name || detail?.type_name) && (
-                      <span className='hidden md:inline'>|</span>
-                    )}
                   </>
                 )}
 
@@ -2596,10 +2596,6 @@ function PlayPageClient() {
                     <span className='border border-gray-500/60 px-2 py-[1px] rounded'>
                       {detail.class}
                     </span>
-                    {/* Separator after Class, if Source Name or Type Name exists */}
-                    {(detail?.source_name || detail?.type_name) && (
-                      <span className='hidden md:inline'>|</span>
-                    )}
                   </>
                 )}
 
@@ -2609,10 +2605,6 @@ function PlayPageClient() {
                     <span className='border border-gray-500/60 px-2 py-[1px] rounded'>
                       {detail.type_name}
                     </span>
-                    {/* Separator after Type Name, if Source Name exists */}
-                    {detail?.source_name && (
-                      <span className='hidden md:inline'>|</span>
-                    )}
                   </>
                 )}
 

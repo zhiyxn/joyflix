@@ -81,7 +81,7 @@ const Modal: FC<ModalProps> = ({ children, onClose, title, showReset, onReset })
               className='px-2 py-1 text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 border border-red-200 hover:border-red-300 dark:border-red-800 dark:hover:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors'
               title='重置为默认设置'
             >
-              恢复默认
+              重置
             </button>
           )}
         </div>
@@ -411,7 +411,7 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
               <div className='space-y-3 relative z-10'>
                 <div>
                   <h4 className='font-medium text-zinc-800 dark:text-zinc-200'>豆瓣数据代理</h4>
-                  <p className='text-xs text-zinc-500 dark:text-zinc-400 mt-1'>选择获取豆瓣数据的方式</p>
+                  <p className='text-xs text-zinc-500 dark:text-zinc-400 mt-1'>若遇到无法获取豆瓣数据请重新选择代理方式</p>
                 </div>
                 {/* Custom Dropdown would go here, for now, using a standard select for simplicity */}
                  <CustomSelect
@@ -451,7 +451,7 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
               <div className='space-y-3 relative z-10'>
                 <div>
                   <h4 className='font-medium text-zinc-800 dark:text-zinc-200'>豆瓣图片代理</h4>
-                  <p className='text-xs text-zinc-500 dark:text-zinc-400 mt-1'>选择获取豆瓣图片的方式</p>
+                  <p className='text-xs text-zinc-500 dark:text-zinc-400 mt-1'>若遇到无法获取豆瓣海报请重新选择代理方式</p>
                 </div>
                 <CustomSelect
                     options={doubanImageProxyTypeOptions}
@@ -491,7 +491,7 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
               {/* Optimization Toggle */}
               <div className='flex items-center justify-between'>
                 <div>
-                  <h4 className='font-medium text-zinc-800 dark:text-zinc-200'>启用优选测速</h4>
+                  <h4 className='font-medium text-zinc-800 dark:text-zinc-200'>启用优选路线</h4>
                   <p className='text-xs text-zinc-500 dark:text-zinc-400 mt-1'>如遇加载速度缓慢问题关闭此项</p>
                 </div>
                 <label className='flex items-center cursor-pointer'>
@@ -516,7 +516,7 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
                 <div>
                   <h4 className='font-medium text-zinc-800 dark:text-zinc-200'>启用并行测速</h4>
                   <p className='text-xs text-zinc-500 dark:text-zinc-400 mt-1'>
-                    如遇优选测速导致网站奔溃，关闭后将改为串行测速
+                    如遇优选测速导致应用奔溃，关闭后将启用串行测速
                   </p>
                 </div>
                 <label className='flex items-center cursor-pointer'>
