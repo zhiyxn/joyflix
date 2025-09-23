@@ -27,20 +27,20 @@ import { useIsTablet } from '@/lib/useIsTablet';
 
 function DetailPageClient() {
   const [instanceId] = useState(() => Date.now().toString());
-  const [isMobile, setIsMobile] = useState(false); // New state for mobile detection
+  const [isMobile, setIsMobile] = useState(false); // 用于移动端检测的新状态
 
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(typeof window !== 'undefined' && window.innerWidth < 768);
     };
 
-    checkMobile(); // Check on mount
-    window.addEventListener('resize', checkMobile); // Update on resize
+    checkMobile(); // 组件挂载时检查
+    window.addEventListener('resize', checkMobile); // 窗口大小改变时更新
 
     return () => {
-      window.removeEventListener('resize', checkMobile); // Cleanup
+      window.removeEventListener('resize', checkMobile); // 清理
     };
-  }, []); // Run once on mount
+  }, []); // 组件挂载时仅运行一次
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -52,7 +52,7 @@ function DetailPageClient() {
   const fetchDoubanMovieData = async (id: string) => {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 seconds timeout
+      const timeoutId = setTimeout(() => controller.abort(), 6000); // 6秒超时
 
       const response = await fetch(`/api/douban/movie/${id}`, { signal: controller.signal });
       clearTimeout(timeoutId);
@@ -77,7 +77,7 @@ function DetailPageClient() {
   const fetchWMDBData = async (id: string) => {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 seconds timeout
+      const timeoutId = setTimeout(() => controller.abort(), 6000); // 6秒超时
 
       const response = await fetch(`/api/wmdb?id=${id}`, { signal: controller.signal });
       clearTimeout(timeoutId);
@@ -109,16 +109,16 @@ function DetailPageClient() {
   const initialClass = searchParams.get('class');
   const initialDesc = searchParams.get('desc');
 
-  // Initialize detail with whatever is available from searchParams
+  // 使用 searchParams 中可用的任何数据初始化详情
   const [detail, setDetail] = useState<SearchResult | null>(() => {
-    // Prioritize initialPoster if available, and initialize other fields
-    if (source || id || title) { // Check if any basic param is present to initialize detail
+    // 如果 initialPoster 可用，则优先使用，并初始化其他字段
+    if (source || id || title) { // 检查是否存在任何基本参数以初始化详情
       return {
         id: id || '',
         source: source || '',
         title: title || '',
         year: year || undefined,
-        poster: initialPoster || '', // Always use initialPoster if present, otherwise empty
+        poster: initialPoster || '', // 如果存在 initialPoster 则始终使用，否则为空
         class: initialClass || undefined,
         desc: initialDesc || undefined,
         episodes: [],
@@ -129,11 +129,11 @@ function DetailPageClient() {
     return null;
   });
 
-  const [isLoadingApi, setIsLoadingApi] = useState(false); // Indicates if an API call is in progress
+  const [isLoadingApi, setIsLoadingApi] = useState(false); // 指示API调用是否正在进行中
   const [error, setError] = useState<string | null>(null);
 
   const [isFavorited, setIsFavorited] = useState(false);
-  const [isFavoriting, setIsFavoriting] = useState(false); // Keep this for disabling the button during the async operation
+  const [isFavoriting, setIsFavoriting] = useState(false); // 在异步操作期间禁用按钮时保留此状态
   const [allFavorites, setAllFavorites] = useState<Record<string, Favorite>>({});
   const [showTrailerConfirmDialog, setShowTrailerConfirmDialog] = useState(false);
   const [showNoTrailerDialog, setShowNoTrailerDialog] = useState(false);
@@ -145,21 +145,21 @@ function DetailPageClient() {
     setShowTrailerConfirmDialog(false);
   };
 
-  // Check favorite status on mount and when detail changes
+  // 在组件挂载和详情更改时检查收藏状态
   useEffect(() => {
     if (!detail?.title) return;
 
     const fetchFavoriteStatus = async () => {
       try {
-        // Fetch the entire favorites list
+        // 获取整个收藏列表
         const response = await fetch('/api/favorites');
         if (!response.ok) {
           throw new Error('Failed to fetch favorites');
         }
         const favorites: Record<string, Favorite> = await response.json();
-        setAllFavorites(favorites); // Store all favorites in state
+        setAllFavorites(favorites); // 将所有收藏存储在状态中
 
-        // Check if any favorite has the same title
+        // 检查是否有任何收藏具有相同的标题
         const isAlreadyFavoritedByTitle = Object.values(favorites).some(
           (fav) => fav.title === detail.title
         );
@@ -172,11 +172,11 @@ function DetailPageClient() {
 
     fetchFavoriteStatus();
 
-    // We still subscribe to updates to reflect changes made on this page immediately
+    // 我们仍然订阅更新以立即反映此页面上所做的更改
     const unsubscribe = subscribeToDataUpdates(
       'favoritesUpdated',
       (newFavorites: Record<string, any>) => {
-        setAllFavorites(newFavorites); // Update all favorites in state on update
+        setAllFavorites(newFavorites); // 更新时更新状态中的所有收藏
         const isNowFavoritedByTitle = Object.values(newFavorites).some(
           (fav) => fav.title === detail.title
         );
@@ -184,7 +184,7 @@ function DetailPageClient() {
       }
     );
 
-    return () => unsubscribe(); // Cleanup subscription
+    return () => unsubscribe(); // 清理订阅
   }, [detail]);
 
   useEffect(() => {
@@ -224,33 +224,33 @@ function DetailPageClient() {
           const wmdbData = await fetchWMDBData(doubanId);
           
           if (wmdbData && wmdbData.data && wmdbData.data.length > 0) {
-            const movieData = wmdbData.data[0]; // Assuming the first item is the relevant one
+            const movieData = wmdbData.data[0]; // 假设第一项是相关的
             
             
             videoDetailToSet = {
-              id: id || '', // Keep existing id or empty
-              source: source || '', // Keep existing source or empty
-              title: title || movieData.name || '', // Prioritize existing title, then WMDB name
-              year: wmdbData.year || year || undefined, // Prioritize WMDB year, then existing year
+              id: id || '', // 保留现有ID或为空
+              source: source || '', // 保留现有来源或为空
+              title: title || movieData.name || '', // 优先使用现有标题，然后是WMDB名称
+              year: wmdbData.year || year || undefined, // 优先使用WMDB年份，然后是现有年份
               poster: initialPoster || movieData.poster || '', // Prioritize existing poster, then WMDB poster
               class: movieData.genre
                 ? Array.isArray(movieData.genre)
                   ? movieData.genre.join(', ')
                   : String(movieData.genre)
-                : initialClass || undefined, // WMDB genre, then existing class
-              desc: movieData.description || initialDesc || undefined, // WMDB description, then existing desc
-              country: movieData.country || undefined, // WMDB country
-              episodes: [], // Not provided by WMDB, keep empty
-              episodes_titles: [], // Not provided by WMDB, keep empty
+                : initialClass || undefined, // WMDB类型，然后是现有类别
+              desc: movieData.description || initialDesc || undefined, // WMDB描述，然后是现有描述
+              country: movieData.country || undefined, // WMDB国家
+              episodes: [], // WMDB未提供，保持为空
+              episodes_titles: [], // WMDB未提供，保持为空
               source_name: '', // Not provided by WMDB, keep empty
             } as SearchResult;
             wmdbDataFetched = true;
           }
         }
 
-        // Fallback to existing logic if WMDB data was not fetched or doubanId was not present
+        // 如果未获取到WMDB数据或不存在doubanId，则回退到现有逻辑
         if (!doubanDataFetched && !wmdbDataFetched) {
-          // Scenario 1: We have source and id. Fetch full details.
+          // 场景1：我们有source和id。获取完整详情。
           if (source && id) {
             const detailResponse = await fetch(
               `/api/detail?source=${source}&id=${id}`
@@ -261,17 +261,17 @@ function DetailPageClient() {
             const fetchedDetail = await detailResponse.json();
             videoDetailToSet = fetchedDetail ? { ...fetchedDetail } : null;
 
-            // Preserve initial poster if provided
+            // 如果提供了初始海报，则保留它
             if (initialPoster && videoDetailToSet) {
               videoDetailToSet.poster = initialPoster;
             }
           }
-          // If we don't have source/id, but we already have a description,
-          // then we consider the data sufficient and don't need to hit the stream API.
+          // 如果我们没有source/id，但已经有了描述，
+          // 那么我们认为数据足够，不需要调用流API。
           else if (detail?.desc) {
             videoDetailToSet = detail;
           }
-          // Scenario 2: We only have a title. Search for it.
+          // 场景2：我们只有一个标题。搜索它。
           else if (title) {
             const searchResponse = await fetch(
               `/api/search/stream?q=${encodeURIComponent(title)}${year ? `&year=${year}` : ''}`
@@ -287,14 +287,14 @@ function DetailPageClient() {
 
             videoDetailToSet = foundVideoDetail ? { ...foundVideoDetail } : null;
 
-            // Preserve initial poster if provided
+            // 如果提供了初始海报，则保留它
             if (initialPoster && videoDetailToSet) {
               videoDetailToSet.poster = initialPoster;
             }
           }
           else {
-            // No source/id and no title.
-            // The component already handles the case where detail is null.
+            // 没有source/id，也没有标题。
+            // 组件已经处理了detail为null的情况。
             return;
           }
         }
@@ -305,13 +305,13 @@ function DetailPageClient() {
 
         setDetail(prevDetail => {
           if (!videoDetailToSet) {
-            return prevDetail; // Should not happen due to earlier check, but for safety
+            return prevDetail; // 由于之前的检查，这不应该发生，但为了安全起见
           }
 
-          // Initialize newDetail based on prevDetail or a default SearchResult structure
+          // 基于prevDetail或默认SearchResult结构初始化newDetail
           const newDetail: SearchResult = prevDetail
             ? { ...prevDetail }
-            : { // Default SearchResult structure if prevDetail is null
+            : { // 如果prevDetail为null，则为默认SearchResult结构
                 id: '',
                 source: '',
                 title: '',
@@ -324,15 +324,15 @@ function DetailPageClient() {
                 source_name: '',
               };
 
-          // Always update core identifiers from videoDetailToSet, ensuring they are strings
-          // Use videoDetailToSet.field if it exists and is truthy, otherwise keep newDetail.field
+          // 始终从videoDetailToSet更新核心标识符，确保它们是字符串
+          // 如果videoDetailToSet.field存在且为真值，则使用它，否则保留newDetail.field
           newDetail.id = videoDetailToSet.id || newDetail.id;
           newDetail.source = videoDetailToSet.source || newDetail.source;
           newDetail.title = videoDetailToSet.title || newDetail.title;
           newDetail.source_name = videoDetailToSet.source_name || newDetail.source_name;
 
-          // Conditionally update optional fields only if they are "missing" in prevDetail
-          // "Missing" for strings means null, undefined, or empty string
+          // 仅当prevDetail中“缺少”可选字段时才会有条件地更新它们
+          // 对于字符串，“缺少”表示null、undefined或空字符串
           if (!newDetail.year && videoDetailToSet.year) newDetail.year = videoDetailToSet.year;
           if (!newDetail.poster && videoDetailToSet.poster) newDetail.poster = videoDetailToSet.poster;
           if (!newDetail.class && videoDetailToSet.class) newDetail.class = videoDetailToSet.class;
@@ -341,7 +341,7 @@ function DetailPageClient() {
           if ((!newDetail.recommendations || newDetail.recommendations.length === 0) && videoDetailToSet.recommendations && videoDetailToSet.recommendations.length > 0) {
             newDetail.recommendations = videoDetailToSet.recommendations;
           }
-          // Add this block
+          // 添加此块
           if ((!newDetail.celebrities || newDetail.celebrities.length === 0) && videoDetailToSet.celebrities && videoDetailToSet.celebrities.length > 0) {
             newDetail.celebrities = videoDetailToSet.celebrities;
           }
@@ -349,7 +349,7 @@ function DetailPageClient() {
             newDetail.trailerUrl = videoDetailToSet.trailerUrl;
           }
 
-          // "Missing" for arrays means null, undefined, or empty array
+          // 对于数组，“缺少”表示null、undefined或空数组
           if ((!newDetail.episodes || newDetail.episodes.length === 0) && videoDetailToSet.episodes && videoDetailToSet.episodes.length > 0) {
             newDetail.episodes = videoDetailToSet.episodes;
           }
@@ -414,22 +414,21 @@ function DetailPageClient() {
 
     try {
       if (isFavorited) {
-        // Item is already favorited, so unfavorite it
-        // Find the exact favorite entry by title and then delete using its key
+        // 项目已被收藏，因此取消收藏
+        // 按标题查找确切的收藏条目，然后使用其键删除
         const favoritedEntryKey = Object.keys(allFavorites).find(key => allFavorites[key].title === detail.title);
 
         if (favoritedEntryKey) {
-          // The key is in the format "source+id"
+          // 键的格式为 "source+id"
           const [sourceToDelete, idToDelete] = favoritedEntryKey.split('+');
-          await deleteFavorite(sourceToDelete, idToDelete); // Use the more general deleteFavorite
+          await deleteFavorite(sourceToDelete, idToDelete); // 使用更通用的deleteFavorite
         } else {
-          // Fallback: if for some reason the key wasn't found, try deleting by title
-          // This might happen if the favorite was added by another mechanism not using source+id
-          // or if the allFavorites state is not perfectly in sync.
+          // 后备方案：如果由于某种原因未找到键，请尝试按标题删除
+          // 如果收藏是使用未使用source+id的另一种机制添加的，或者如果allFavorites状态未完全同步，则可能会发生这种情况。
           await deleteFavoriteByTitle(detail.title);
         }
       } else {
-        // Item is not favorited, so favorite it
+        // 项目未被收藏，因此收藏它
         const favoriteData = {
           title: detail.title,
           source_name: '收藏',
@@ -437,10 +436,10 @@ function DetailPageClient() {
           cover: detail.poster || '',
           total_episodes: 1,
           save_time: Date.now(),
-          doubanId: doubanId || undefined, // Add doubanId here
+          doubanId: doubanId || undefined, // 在此处添加doubanId
         };
-        // When saving, we still use 'title_based' and detail.title as source and id
-        // to maintain consistency for favorites initiated from this page.
+        // 保存时，我们仍使用 'title_based' 和 detail.title 作为 source 和 id
+        // 以保持从此页面发起的收藏的一致性。
         await saveFavorite('title_based', detail.title, favoriteData);
       }
     } catch (err: any) {
@@ -469,7 +468,7 @@ function DetailPageClient() {
     );
   }
 
-  // If detail is null and we are not loading, it means we couldn't even initialize with basic params
+  // 如果detail为null且我们没有加载，则意味着我们甚至无法使用基本参数进行初始化
   if (!detail && !isLoadingApi) {
     return (
       <PageLayout activePath={pathname}>
@@ -533,7 +532,7 @@ function DetailPageClient() {
             </div>
 
             <div className='flex flex-row flex-wrap items-center gap-x-2 sm:gap-x-4 gap-y-2 text-sm text-gray-500 dark:text-gray-400 mb-6'>
-              {/* Douban Rate - First */}
+              {/* 豆瓣评分 - 第一 */}
               {rate && (
                 <span className='px-2 py-1 border border-gray-400/60 rounded-md text-xs font-medium text-gray-600 dark:text-gray-300 flex items-center gap-1'>
                   <Star size={14} className='fill-current text-yellow-400' />
@@ -541,21 +540,21 @@ function DetailPageClient() {
                 </span>
               )}
 
-              {/* Year - Second */}
+              {/* 年份 - 第二 */}
               {detail?.year ? (
                 <span className='px-2 py-1 border border-gray-400/60 rounded-md text-xs font-medium text-gray-600 dark:text-gray-300'>
                   {detail.year}
                 </span>
               ) : (isLoadingApi ? <div className='h-6 bg-gray-500 dark:bg-gray-400 rounded w-16 animate-pulse'></div> : null)}
 
-              {/* Class - Third */}
+              {/* 类别 - 第三 */}
               {detail?.class ? (
                 <span className='px-2 py-1 border border-gray-400/60 rounded-md text-xs font-medium text-gray-600 dark:text-gray-300'>
                   {detail.class}
                 </span>
               ) : (isLoadingApi ? <div className='h-6 bg-gray-500 dark:bg-gray-400 rounded w-24 animate-pulse'></div> : null)}
 
-              {/* Country - Fourth */}
+              {/* 国家 - 第四 */}
               {detail?.country ? (
                 <span className='px-2 py-1 border border-gray-400/60 rounded-md text-xs font-medium text-gray-600 dark:text-gray-300'>
                   {detail.country}
@@ -573,10 +572,10 @@ function DetailPageClient() {
                 <PlayCircle size={24} />
                 <span className='whitespace-nowrap'>{isMobile ? '播放' : '立即播放'}</span>
               </button>
-              {/* New Trailer Button */}
+              {/* 新的预告片按钮 */}
               <button
                 onClick={() => {
-                  if (isLoadingApi) return; // Do nothing if still loading
+                  if (isLoadingApi) return; // 如果仍在加载，则不执行任何操作
                   if (detail?.trailerUrl && detail.trailerUrl.length > 0) {
                     setShowTrailerConfirmDialog(true);
                   } else {
@@ -619,15 +618,15 @@ function DetailPageClient() {
             </div>
           </div>
         </div>
-        {/* Celebrities Section */}
+        {/* 演职员表部分 */}
         {isLoadingApi && doubanId && (!detail?.celebrities || detail.celebrities.length === 0) ? (
           <div className='mt-8'>
-            <div className='h-8 w-48 mb-4 bg-gray-500 dark:bg-gray-400 rounded animate-pulse'></div> {/* Title placeholder */}
+            <div className='h-8 w-48 mb-4 bg-gray-500 dark:bg-gray-400 rounded animate-pulse'></div> {/* 标题占位符 */}
             <div className="flex overflow-x-auto space-x-4 pb-4 hide-scrollbar">
               {Array.from({ length: 9 }).map((_, index) => (
                 <div key={index} className="flex-none w-32 sm:w-44 flex flex-col items-center text-center">
                   <div className="relative w-full aspect-[2/3] rounded-lg bg-gray-500 dark:bg-gray-400 animate-pulse mb-2"></div>
-                  <div className="h-5 bg-gray-500 dark:bg-gray-400 rounded w-3/4 mb-1 animate-pulse"></div> {/* Changed h-4 to h-5 */}
+                  <div className="h-5 bg-gray-500 dark:bg-gray-400 rounded w-3/4 mb-1 animate-pulse"></div> {/* 将h-4更改为h-5 */}
                   <div className="h-4 bg-gray-500 dark:bg-gray-400 rounded w-1/2 animate-pulse"></div>
                 </div>
               ))}
@@ -639,10 +638,10 @@ function DetailPageClient() {
           )
         )}
 
-        {/* Recommendations Section */}
+        {/* 推荐部分 */}
         {isLoadingApi && doubanId && (!detail?.recommendations || detail.recommendations.length === 0) ? (
           <div className='mt-8'>
-            <div className='h-8 w-48 mb-4 bg-gray-500 dark:bg-gray-400 rounded animate-pulse'></div> {/* Title placeholder */}
+            <div className='h-8 w-48 mb-4 bg-gray-500 dark:bg-gray-400 rounded animate-pulse'></div> {/* 标题占位符 */}
             <div className="flex overflow-x-auto space-x-4 pb-4 hide-scrollbar">
               {Array.from({ length: 9 }).map((_, index) => (
                 <div key={index} className="flex-none w-32 sm:w-44 flex flex-col items-center text-center">
@@ -657,7 +656,7 @@ function DetailPageClient() {
             <RecommendationSection recommendations={detail.recommendations} />
           )
         )}
-        {/* Confirmation Dialog for Trailer */}
+        {/* 预告片确认对话框 */}
         <ConfirmationDialog
           isOpen={showTrailerConfirmDialog}
           onClose={() => setShowTrailerConfirmDialog(false)}
@@ -666,11 +665,11 @@ function DetailPageClient() {
           message="是否转跳到豆瓣观看预告片？"
         />
 
-        {/* No Trailer Dialog */}
+        {/* 无预告片对话框 */}
         <ConfirmationDialog
           isOpen={showNoTrailerDialog}
           onClose={() => setShowNoTrailerDialog(false)}
-          onConfirm={() => setShowNoTrailerDialog(false)} // No action needed, just close
+          onConfirm={() => setShowNoTrailerDialog(false)} // 无需任何操作，只需关闭
           title="提示"
           message="暂无预告～"
           showCancelButton={false}

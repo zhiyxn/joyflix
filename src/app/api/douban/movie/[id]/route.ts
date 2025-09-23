@@ -87,11 +87,9 @@ export async function GET(
 
       // --- actorname: 只获取中文名 ---
       const rawActorName = element.find('a').attr('title') || '';
-      let actorname = '';
-      // 如果名称包含中文字符或间隔点 (·)，则假定为翻译名称，并移除其后的英文部分。
-      if (/[\u4e00-\u9fa5·]/.test(rawActorName)) {
-        actorname = rawActorName.replace(/\s[A-Z].*$/, '').trim();
-      }
+      // 提取 actorname 中的中文字符部分
+      const chineseNameMatch = rawActorName.match(/[一-龥]+/);
+      const actorname = chineseNameMatch ? chineseNameMatch[0] : '';
 
       // --- role: 只获取 "(饰...)" ---
       const rawRole = element.find('.role').text().trim();
