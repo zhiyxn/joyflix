@@ -141,7 +141,7 @@ async function initConfig() {
             });
           }
         });
-        // 站长
+        // 超管
         const ownerUser = process.env.USERNAME;
         if (ownerUser) {
           adminConfig!.UserConfig.Users = adminConfig!.UserConfig.Users.filter(
@@ -333,7 +333,7 @@ export async function getConfig(): Promise<AdminConfig> {
     }));
 
     const ownerUser = process.env.USERNAME || '';
-    // 检查配置中的站长用户是否和 USERNAME 匹配，如果不匹配则降级为用户
+    // 检查配置中的超管用户是否和 USERNAME 匹配，如果不匹配则降级为用户
     let containOwner = false;
     adminConfig.UserConfig.Users.forEach((user) => {
       if (user.username !== ownerUser && user.role === 'owner') {

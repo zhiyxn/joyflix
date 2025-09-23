@@ -2551,11 +2551,11 @@ function PlayPageClient() {
               </h1>
 
               {/* 关键信息行 */}
-              <div className='flex flex-row flex-wrap items-center gap-x-2 sm:gap-x-4 gap-y-2 text-sm mb-4 text-gray-600 dark:text-gray-300 flex-shrink-0'>
+              <div className='flex flex-wrap items-center gap-x-2 gap-y-1 text-sm mb-4 text-gray-600 dark:text-gray-300 flex-shrink-0'>
                 {/* 年份 (Year) - First */}
                 {(detail?.year || videoYear) && (
                   <>
-                    <span className='px-2 py-1 border border-gray-400/60 rounded-md text-xs font-medium text-gray-600 dark:text-gray-300'>
+                    <span className='border border-gray-500/60 px-2 py-[1px] rounded'>
                       {detail?.year || videoYear}
                     </span>
                   </>
@@ -2564,7 +2564,7 @@ function PlayPageClient() {
                 {/* 分类 (Class) - Second */}
                 {detail?.class && (
                   <>
-                    <span className='px-2 py-1 border border-gray-400/60 rounded-md text-xs font-medium text-gray-600 dark:text-gray-300'>
+                    <span className='border border-gray-500/60 px-2 py-[1px] rounded'>
                       {detail.class}
                     </span>
                   </>
@@ -2573,7 +2573,7 @@ function PlayPageClient() {
                 {/* 类型名称 (Type Name) - Fourth */}
                 {detail?.type_name && (
                   <>
-                    <span className='px-2 py-1 border border-gray-400/60 rounded-md text-xs font-medium text-gray-600 dark:text-gray-300'>
+                    <span className='border border-gray-500/60 px-2 py-[1px] rounded'>
                       {detail.type_name}
                     </span>
                   </>
@@ -2581,7 +2581,7 @@ function PlayPageClient() {
 
                 {/* 来源名称 (Source Name) - Third */}
                 {detail?.source_name && (
-                  <span className='px-2 py-1 border border-gray-400/60 rounded-md text-xs font-medium text-gray-600 dark:text-gray-300'>
+                  <span className='border border-gray-500/60 px-2 py-[1px] rounded'>
                     {detail.source_name}
                   </span>
                 )}

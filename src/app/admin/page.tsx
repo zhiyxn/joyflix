@@ -57,7 +57,7 @@ const AdminDashboard = ({ role, handleResetConfig }: { role: string | null, hand
         <div className="flex items-center justify-between mb-8">
             <div className='flex items-center gap-4'>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                    后台管理
+                    后台设置
                 </h1>
                 {role === 'owner' && (
                   <button
@@ -69,9 +69,6 @@ const AdminDashboard = ({ role, handleResetConfig }: { role: string | null, hand
                 )}
             </div>
         </div>
-        <p className="-mt-6 mb-8 text-sm text-gray-600 dark:text-gray-400">
-            选择一个配置进入，以进行详细配置。
-        </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {menuItems.map((item) => (
             <Link href={item.href} key={item.title}>

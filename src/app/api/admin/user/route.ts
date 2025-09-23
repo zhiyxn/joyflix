@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       targetEntry.role === 'owner' &&
       action !== 'changePassword'
     ) {
-      return NextResponse.json({ error: '无法操作站长' }, { status: 400 });
+      return NextResponse.json({ error: '无法操作超管' }, { status: 400 });
     }
 
     // 权限校验逻辑
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
           // 目标是管理员
           if (operatorRole !== 'owner') {
             return NextResponse.json(
-              { error: '仅站长可封禁管理员' },
+              { error: '仅超管可封禁管理员' },
               { status: 401 }
             );
           }
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
         if (isTargetAdmin) {
           if (operatorRole !== 'owner') {
             return NextResponse.json(
-              { error: '仅站长可操作管理员' },
+              { error: '仅超管可操作管理员' },
               { status: 401 }
             );
           }
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
         }
         if (operatorRole !== 'owner') {
           return NextResponse.json(
-            { error: '仅站长可设置管理员' },
+            { error: '仅超管可设置管理员' },
             { status: 401 }
           );
         }
@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
         }
         if (operatorRole !== 'owner') {
           return NextResponse.json(
-            { error: '仅站长可取消管理员' },
+            { error: '仅超管可取消管理员' },
             { status: 401 }
           );
         }
@@ -224,10 +224,10 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: '缺少新密码' }, { status: 400 });
         }
 
-        // 权限检查：不允许修改站长密码
+        // 权限检查：不允许修改超管密码
         if (targetEntry.role === 'owner') {
           return NextResponse.json(
-            { error: '无法修改站长密码' },
+            { error: '无法修改超管密码' },
             { status: 401 }
           );
         }
@@ -238,7 +238,7 @@ export async function POST(request: NextRequest) {
           username !== targetUsername
         ) {
           return NextResponse.json(
-            { error: '仅站长可修改其他管理员密码' },
+            { error: '仅超管可修改其他管理员密码' },
             { status: 401 }
           );
         }
@@ -261,7 +261,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        // 权限检查：站长可删除所有用户（除了自己），管理员可删除用户
+        // 权限检查：超管可删除所有用户（除了自己），管理员可删除用户
         if (username === targetUsername) {
           return NextResponse.json(
             { error: '不能删除自己' },
@@ -271,7 +271,7 @@ export async function POST(request: NextRequest) {
 
         if (isTargetAdmin && operatorRole !== 'owner') {
           return NextResponse.json(
-            { error: '仅站长可删除管理员' },
+            { error: '仅超管可删除管理员' },
             { status: 401 }
           );
         }

@@ -318,7 +318,7 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
   const showAdminPanel = authInfo?.role === 'owner' || authInfo?.role === 'admin';
   const showChangePassword = authInfo?.role !== 'owner' && storageType !== 'localstorage';
 
-  const getRoleText = (role?: string) => ({ owner: '站长', admin: '管理员', user: '用户' }[role || ''] || '');
+  const getRoleText = (role?: string) => ({ owner: '超管', admin: '管理员', user: '用户' }[role || ''] || '');
 
   const menuPanel = (
     <>
@@ -411,7 +411,7 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
               <div className='space-y-3 relative z-10'>
                 <div>
                   <h4 className='font-medium text-zinc-800 dark:text-zinc-200'>豆瓣数据代理</h4>
-                  <p className='text-xs text-zinc-500 dark:text-zinc-400 mt-1'>若遇无法获取豆瓣数据请重新选择代理方式</p>
+                  <p className='text-xs text-zinc-500 dark:text-zinc-400 mt-1'>若遇无法获取豆瓣数据需重新选择代理方式</p>
                 </div>
                 {/* Custom Dropdown would go here, for now, using a standard select for simplicity */}
                  <CustomSelect
@@ -451,7 +451,7 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
               <div className='space-y-3 relative z-10'>
                 <div>
                   <h4 className='font-medium text-zinc-800 dark:text-zinc-200'>豆瓣海报代理</h4>
-                  <p className='text-xs text-zinc-500 dark:text-zinc-400 mt-1'>若遇无法获取豆瓣海报请重新选择代理方式</p>
+                  <p className='text-xs text-zinc-500 dark:text-zinc-400 mt-1'>若遇无法获取豆瓣海报需重新选择代理方式</p>
                 </div>
                 <CustomSelect
                     options={doubanImageProxyTypeOptions}
@@ -492,7 +492,7 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
               <div className='flex items-center justify-between'>
                 <div>
                   <h4 className='font-medium text-zinc-800 dark:text-zinc-200'>启用优选路线</h4>
-                  <p className='text-xs text-zinc-500 dark:text-zinc-400 mt-1'>可关闭此项转为手动自选路线</p>
+                  <p className='text-xs text-zinc-500 dark:text-zinc-400 mt-1'>关闭此项可转为手动自选路线</p>
                 </div>
                 <label className='flex items-center cursor-pointer'>
                   <div className='relative'>

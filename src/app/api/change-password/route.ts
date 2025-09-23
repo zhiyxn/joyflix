@@ -38,10 +38,10 @@ export async function POST(request: NextRequest) {
 
     const username = authInfo.username;
 
-    // 不允许站长修改密码（站长用户名等于 process.env.USERNAME）
+    // 不允许超管修改密码（超管用户名等于 process.env.USERNAME）
     if (username === process.env.USERNAME) {
       return NextResponse.json(
-        { error: '站长不能通过此接口修改密码' },
+        { error: '超管不能通过此接口修改密码' },
         { status: 403 }
       );
     }

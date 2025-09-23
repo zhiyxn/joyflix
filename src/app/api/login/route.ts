@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '密码不能为空' }, { status: 400 });
     }
 
-    // 可能是站长，直接读环境变量
+    // 可能是超管，直接读环境变量
     if (
       username === process.env.USERNAME &&
       password === process.env.PASSWORD

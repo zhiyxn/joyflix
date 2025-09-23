@@ -344,7 +344,7 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                               }`}
                           >
                             {user.role === 'owner'
-                              ? '站长'
+                              ? '超管'
                               : user.role === 'admin'
                                 ? '管理员'
                                 : '用户'}
