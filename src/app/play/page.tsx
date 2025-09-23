@@ -2257,7 +2257,7 @@ function PlayPageClient() {
       console.error('创建播放器失败:', err);
       setError('播放器初始化失败');
     }
-  }, [Artplayer, Hls, videoUrl, loading, blockAdEnabled, artplayerPluginHlsControl]);
+  }, [Artplayer, Hls, videoUrl, loading, blockAdEnabled]);
 
   
 
