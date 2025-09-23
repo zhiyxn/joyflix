@@ -99,30 +99,7 @@ function DetailPageClient() {
     }
   };
 
-  const fetchCelebritiesData = async (id: string) => {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 seconds timeout
 
-      const response = await fetch(`/api/douban/movie/${id}/celebrities`, { signal: controller.signal });
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        console.warn(`Douban celebrities API error for doubanId ${id}: ${response.statusText}`);
-        return null;
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
-        console.warn(`Douban celebrities API request timed out for doubanId ${id}`);
-      } else {
-        console.error(`Error fetching from Douban celebrities API for doubanId ${id}:`, error);
-      }
-      return null;
-    }
-  };
 
   const source = searchParams.get('source');
   const id = searchParams.get('id');
@@ -234,6 +211,7 @@ function DetailPageClient() {
               country: doubanData.country || undefined,
               recommendations: doubanData.recommendations || [],
               trailerUrl: doubanData.trailerUrl || undefined,
+              celebrities: doubanData.celebrities || [],
               episodes: [],
               episodes_titles: [],
               source_name: '',
@@ -318,14 +296,6 @@ function DetailPageClient() {
             // No source/id and no title.
             // The component already handles the case where detail is null.
             return;
-          }
-        }
-
-        // Fetch celebrities data if doubanId is available and videoDetailToSet exists
-        if (doubanId && videoDetailToSet) {
-          const celebritiesData = await fetchCelebritiesData(doubanId);
-          if (celebritiesData && celebritiesData.length > 0) {
-            videoDetailToSet.celebrities = celebritiesData;
           }
         }
 

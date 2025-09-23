@@ -48,7 +48,7 @@ export async function GET(
     $movie('#info span.pl').each((i, el) => {
       if ($movie(el).text().includes('制片国家/地区')) {
         const nextSibling = el.nextSibling;
-        if (nextSibling && nextSibling.nodeType === 3) { // 3 代表 Node.TEXT_NODE
+        if (nextSibling && nextSibling.nodeType === 3) { // 3 代表 文本节点 (Node.TEXT_NODE)
           country = nextSibling.nodeValue.trim().replace(/ \/ /g, ',');
         }
         return false;
