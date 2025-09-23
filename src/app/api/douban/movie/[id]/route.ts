@@ -48,7 +48,7 @@ export async function GET(
     $movie('#info span.pl').each((i, el) => {
       if ($movie(el).text().includes('制片国家/地区')) {
         const nextSibling = el.nextSibling;
-        if (nextSibling && nextSibling.nodeType === 3) { // 3 代表 文本节点 (Node.TEXT_NODE)
+        if (nextSibling && nextSibling.nodeType === 3) { // 3 代表文本节点
           country = nextSibling.nodeValue.trim().replace(/ \/ /g, ',');
         }
         return false;
@@ -84,8 +84,19 @@ export async function GET(
       const element = $celebs(el);
       
       const actorurl = element.find('a').attr('href') || '';
-      const actorname = element.find('a').attr('title') || '';
-      const role = element.find('.role').text().trim();
+
+      // --- actorname: 只获取中文名 ---
+      const rawActorName = element.find('a').attr('title') || '';
+      let actorname = '';
+      // 如果名称包含中文字符或间隔点 (·)，则假定为翻译名称，并移除其后的英文部分。
+      if (/[\u4e00-\u9fa5·]/.test(rawActorName)) {
+        actorname = rawActorName.replace(/\s[A-Z].*$/, '').trim();
+      }
+
+      // --- role: 只获取 "(饰...)" ---
+      const rawRole = element.find('.role').text().trim();
+      const roleMatch = rawRole.match(/\((饰.*?)\)/);
+      const role = roleMatch ? roleMatch[1] : '';
       
       let actorposter = element.find('.avatar').css('background-image') || '';
       if (actorposter) {
