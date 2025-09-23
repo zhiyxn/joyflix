@@ -64,7 +64,7 @@ const AdminDashboard = ({ role, handleResetConfig }: { role: string | null, hand
                     onClick={handleResetConfig}
                     className='px-2 py-1 text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 border border-red-200 hover:border-red-300 dark:border-red-800 dark:hover:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors'
                   >
-                    恢复默认
+                    重置
                   </button>
                 )}
             </div>

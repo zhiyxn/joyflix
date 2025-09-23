@@ -161,14 +161,11 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
     <div className='space-y-6'>
       <div>
         <h4 className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-3'>
-          用户统计
+          用户总数
         </h4>
-        <div className='p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-600'>
+        <div className='py-2 px-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-600'>
           <div className='text-2xl font-bold text-blue-600 dark:text-blue-200'>
             {config.UserConfig.Users.length}
-          </div>
-          <div className='text-sm text-blue-400 dark:text-blue-300'>
-            总用户数
           </div>
         </div>
       </div>

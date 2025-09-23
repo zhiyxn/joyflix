@@ -46,15 +46,6 @@ interface PlaybackRateSelector {
   html: string;
 }
 
-// 辅助函数：根据宽度获取标准画质名称
-const getStandardQualityName = (width: number): string => {
-  if (width >= 3840) return '4K';
-  if (width >= 2560) return '2K';
-  if (width >= 1920) return '1080P';
-  if (width >= 1280) return '720P';
-  if (width >= 854) return '480P';
-  return 'SD';
-};
 
 
 function PlayPageClient() {
@@ -67,15 +58,10 @@ function PlayPageClient() {
   // -----------------------------------------------------------------------------
   const [Artplayer, setArtplayer] = useState<any>(null);
   const [Hls, setHls] = useState<any>(null);
-  const [artplayerPluginHlsControl, setArtplayerPluginHlsControl] =
-    useState<any>(null);
 
   useEffect(() => {
     import('artplayer').then((art) => setArtplayer(() => art.default));
     import('hls.js').then((hls) => setHls(() => hls.default));
-    import('artplayer-plugin-hls-control').then((plugin) =>
-      setArtplayerPluginHlsControl(() => plugin.default)
-    );
   }, []);
   const [loading, setLoading] = useState(true);
   const [loadingStage, setLoadingStage] = useState<'searching' | 'preferring' | 'fetching' | 'ready'>('searching');
@@ -1792,7 +1778,6 @@ function PlayPageClient() {
     if (
       !Artplayer ||
       !Hls ||
-      !artplayerPluginHlsControl ||
       !videoUrl ||
       loading ||
       currentEpisodeIndex === null ||
@@ -1856,7 +1841,7 @@ function PlayPageClient() {
         isLive: false,
         muted: false,
         autoplay: true,
-        pip: false,
+        pip: true,
         autoSize: false,
         autoMini: false,
         screenshot: false,
@@ -1882,18 +1867,7 @@ function PlayPageClient() {
         moreVideoAttr: {
           crossOrigin: 'anonymous',
         },
-        plugins: [
-          artplayerPluginHlsControl({
-            quality: {
-              control: true,
-              setting: false,
-              getName: (level: any) => getStandardQualityName(level.width),
-              title: '画质',
-              auto: '自动',
-            },
-            
-          }),
-        ],
+        plugins: [],
         // HLS 支持配置
         customType: {
           m3u8: function (video: HTMLVideoElement, url: string) {
@@ -2461,9 +2435,6 @@ function PlayPageClient() {
                   {error}
                 </p>
               </div>
-              <p className='text-sm text-gray-500 dark:text-gray-400'>
-                检查网络连接或尝试刷新页面
-              </p>
             </div>
 
             {/* 操作按钮 */}
@@ -2580,11 +2551,11 @@ function PlayPageClient() {
               </h1>
 
               {/* 关键信息行 */}
-              <div className='flex flex-wrap items-center gap-x-2 gap-y-1 text-sm mb-4 text-gray-600 dark:text-gray-300 flex-shrink-0'>
+              <div className='flex flex-row flex-wrap items-center gap-x-2 sm:gap-x-4 gap-y-2 text-sm mb-4 text-gray-600 dark:text-gray-300 flex-shrink-0'>
                 {/* 年份 (Year) - First */}
                 {(detail?.year || videoYear) && (
                   <>
-                    <span className='border border-gray-500/60 px-2 py-[1px] rounded'>
+                    <span className='px-2 py-1 border border-gray-400/60 rounded-md text-xs font-medium text-gray-600 dark:text-gray-300'>
                       {detail?.year || videoYear}
                     </span>
                   </>
@@ -2593,7 +2564,7 @@ function PlayPageClient() {
                 {/* 分类 (Class) - Second */}
                 {detail?.class && (
                   <>
-                    <span className='border border-gray-500/60 px-2 py-[1px] rounded'>
+                    <span className='px-2 py-1 border border-gray-400/60 rounded-md text-xs font-medium text-gray-600 dark:text-gray-300'>
                       {detail.class}
                     </span>
                   </>
@@ -2602,7 +2573,7 @@ function PlayPageClient() {
                 {/* 类型名称 (Type Name) - Fourth */}
                 {detail?.type_name && (
                   <>
-                    <span className='border border-gray-500/60 px-2 py-[1px] rounded'>
+                    <span className='px-2 py-1 border border-gray-400/60 rounded-md text-xs font-medium text-gray-600 dark:text-gray-300'>
                       {detail.type_name}
                     </span>
                   </>
@@ -2610,7 +2581,7 @@ function PlayPageClient() {
 
                 {/* 来源名称 (Source Name) - Third */}
                 {detail?.source_name && (
-                  <span className='border border-gray-500/60 px-2 py-[1px] rounded'>
+                  <span className='px-2 py-1 border border-gray-400/60 rounded-md text-xs font-medium text-gray-600 dark:text-gray-300'>
                     {detail.source_name}
                   </span>
                 )}
