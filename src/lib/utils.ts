@@ -62,208 +62,111 @@ export function processImageUrl(originalUrl: string): string {
 }
 
 /**
- * 从m3u8地址获取视频质量等级和网络信息
+ * 从m3u8地址获取视频质量等级和网络信息（多点抽样增强版）
  * @param m3u8Url m3u8播放列表的URL
  * @returns Promise<{quality: string, loadSpeed: string, pingTime: number, speedJitter: number}> 视频质量等级和网络信息
  */
-async function _getVideoResolutionFromM3u8(m3u8Url: string): Promise<{
-  quality: string;
-  loadSpeed: string;
-  pingTime: number;
-  speedJitter: number;
-}> {
-  return new Promise((resolve, reject) => {
-    const video = document.createElement('video');
-    video.muted = true;
-    video.preload = 'metadata';
-
-    const pingStart = performance.now();
-    let pingTime = 0;
-
-    // Use a fetch HEAD request for a more accurate ping time if possible
-    fetch(m3u8Url, { method: 'HEAD', mode: 'no-cors' })
-      .then(() => {
-        pingTime = performance.now() - pingStart;
-      })
-      .catch(() => {
-        // Fallback to timing the fetch if HEAD fails (e.g. due to CORS)
-        pingTime = performance.now() - pingStart;
-      });
-
-    const hls = new Hls();
-    let timeout: NodeJS.Timeout;
-
-    const cleanup = () => {
-      clearTimeout(timeout);
-      hls.off(Hls.Events.FRAG_LOADING);
-      hls.off(Hls.Events.FRAG_LOADED);
-      hls.off(Hls.Events.ERROR);
-      hls.destroy();
-      video.onloadedmetadata = null;
-      video.onerror = null;
-      video.src = '';
-      video.load();
-      video.remove();
-    };
-
-    timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error('Timeout loading video metadata'));
-    }, 8000);
-
-    video.onerror = () => {
-      cleanup();
-      reject(new Error('Failed to load video metadata'));
-    };
-
-    const speedSamples: number[] = [];
-    const maxSamples = 3;
-    let fragmentStartTime = 0;
-
-    const calculateStats = () => {
-      let avgSpeed = 0;
-      let speedJitter = 0;
-      let finalLoadSpeed = '未知';
-
-      if (speedSamples.length > 0) {
-        const sum = speedSamples.reduce((a, b) => a + b, 0);
-        avgSpeed = sum / speedSamples.length;
-
-        if (speedSamples.length > 1) {
-          const mean = avgSpeed;
-          const variance = speedSamples.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) / speedSamples.length;
-          speedJitter = Math.sqrt(variance);
-        }
-        
-        finalLoadSpeed = avgSpeed >= 1024 ? `${(avgSpeed / 1024).toFixed(1)} MB/s` : `${avgSpeed.toFixed(1)} KB/s`;
-      }
-      
-      return { finalLoadSpeed, speedJitter };
-    };
-
-    const checkAndResolve = () => {
-      const { finalLoadSpeed, speedJitter } = calculateStats();
-      const width = video.videoWidth;
-      cleanup();
-
-      const quality = 
-        width >= 3840 ? '4K' :
-        width >= 2560 ? '2K' :
-        width >= 1920 ? '1080P' :
-        width >= 1280 ? '720P' :
-        width >= 854 ? '480P' : 'SD';
-      
-      resolve({ quality: width > 0 ? quality : '未知', loadSpeed: finalLoadSpeed, pingTime: Math.round(pingTime), speedJitter });
-    };
-
-    hls.on(Hls.Events.FRAG_LOADING, () => {
-      if (speedSamples.length < maxSamples) {
-        fragmentStartTime = performance.now();
-      }
-    });
-
-    hls.on(Hls.Events.FRAG_LOADED, (event, data) => {
-      if (speedSamples.length < maxSamples && fragmentStartTime > 0) {
-        const loadTime = performance.now() - fragmentStartTime;
-        const size = data.payload.byteLength;
-        if (loadTime > 0 && size > 0) {
-          const speedKBps = size / 1024 / (loadTime / 1000);
-          speedSamples.push(speedKBps);
-        }
-      }
-      // If we have enough samples, or if metadata is already loaded, resolve.
-      if (speedSamples.length >= maxSamples && video.videoWidth > 0) {
-        checkAndResolve();
-      }
-    });
-
-    video.onloadedmetadata = () => {
-      // Wait a bit for more fragments to load to get a better speed sample
-      setTimeout(() => {
-        checkAndResolve();
-      }, 1500);
-    };
-
-    hls.on(Hls.Events.ERROR, (event, data) => {
-      if (data.fatal) {
-        cleanup();
-        // Resolve with what we have, or reject if we have nothing
-        if(speedSamples.length > 0) {
-            console.warn('HLS error, resolving with partial data.');
-            checkAndResolve();
-        } else {
-            reject(new Error(`HLS playback failed: ${data.type} - ${data.details}`));
-        }
-      }
-    });
-
-    hls.loadSource(m3u8Url);
-    hls.attachMedia(video);
-  });
-}
-
-async function _getVideoResolutionFromManifest(m3u8Url: string): Promise<{
-  quality: string;
-  loadSpeed: string;
-  pingTime: number;
-  speedJitter: number;
-}> {
-  const pingStart = performance.now();
-  const response = await fetch(m3u8Url);
-  const pingTime = performance.now() - pingStart;
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const content = await response.text();
-  const size = new TextEncoder().encode(content).length;
-  const loadTime = pingTime;
-
-  let loadSpeed = '未知';
-  if (loadTime > 0 && size > 0) {
-    const speedKBps = size / 1024 / (loadTime / 1000);
-    loadSpeed = speedKBps >= 1024 ? `${(speedKBps / 1024).toFixed(1)} MB/s` : `${speedKBps.toFixed(1)} KB/s`;
-  }
-
-  const resolutionRegex = /RESOLUTION=(\d+)x(\d+)/g;
-  let match;
-  let maxResolution = 0;
-
-  while ((match = resolutionRegex.exec(content)) !== null) {
-    const width = parseInt(match[1], 10);
-    if (width > maxResolution) {
-      maxResolution = width;
-    }
-  }
-
-  let quality = '未知';
-  if (maxResolution > 0) {
-    quality =
-      maxResolution >= 3840 ? '4K' :
-      maxResolution >= 2560 ? '2K' :
-      maxResolution >= 1920 ? '1080P' :
-      maxResolution >= 1280 ? '720P' :
-      maxResolution >= 854 ? '480P' : 'SD';
-  }
-
-  // Jitter cannot be calculated in this method, so return 0
-  return { quality, loadSpeed, pingTime: Math.round(pingTime), speedJitter: 0 };
-}
-
 export async function getVideoResolutionFromM3u8(m3u8Url: string): Promise<{
   quality: string;
   loadSpeed: string;
   pingTime: number;
   speedJitter: number;
 }> {
-  try {
-    return await _getVideoResolutionFromM3u8(m3u8Url);
-  } catch (error) {
-    console.error('Primary method failed, trying manifest parsing as fallback:', error);
-    // Primary method failed, attempt fallback
-    return await _getVideoResolutionFromManifest(m3u8Url);
-  }
+  return new Promise(async (resolve, reject) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+      controller.abort();
+      reject(new Error('Timeout: Multi-point sampling test took too long'));
+    }, 10000); // 10秒总超时
+
+    try {
+      // 1. 获取M3U8清单文件，计算初始延迟(Ping)
+      const pingStart = performance.now();
+      const manifestResponse = await fetch(m3u8Url, { signal: controller.signal });
+      const pingTime = performance.now() - pingStart;
+
+      if (!manifestResponse.ok) {
+        throw new Error(`Manifest fetch failed with status: ${manifestResponse.status}`);
+      }
+      const manifestContent = await manifestResponse.text();
+
+      // 2. 从清单中解析分片URL和最高画质
+      const lines = manifestContent.split('\n');
+      const segmentUrls = lines
+        .filter(line => line.trim() && !line.startsWith('#'))
+        .map(url => new URL(url, m3u8Url).href);
+
+      if (segmentUrls.length === 0) {
+        throw new Error('No segments found in manifest');
+      }
+
+      const resolutionRegex = /RESOLUTION=(\d+)x(\d+)/g;
+      let match;
+      let maxResolution = 0;
+      while ((match = resolutionRegex.exec(manifestContent)) !== null) {
+        const width = parseInt(match[1], 10);
+        if (width > maxResolution) maxResolution = width;
+      }
+      
+      let quality = '未知';
+      if (maxResolution > 0) {
+        quality =
+          maxResolution >= 3840 ? '4K' :
+          maxResolution >= 2560 ? '2K' :
+          maxResolution >= 1920 ? '1080P' :
+          maxResolution >= 1280 ? '720P' :
+          maxResolution >= 854 ? '480P' : 'SD';
+      }
+
+      // 3. 选择测试分片（第一个和中间一个）
+      const segmentsToTest: string[] = [];
+      if (segmentUrls[0]) {
+        segmentsToTest.push(segmentUrls[0]);
+      }
+      if (segmentUrls.length > 2) {
+        segmentsToTest.push(segmentUrls[Math.floor(segmentUrls.length / 2)]);
+      }
+
+      // 4. 并行测试分片下载速度
+      const testSegment = async (url: string): Promise<number> => {
+        try {
+          const startTime = performance.now();
+          const segmentResponse = await fetch(url, { signal: controller.signal });
+          if (!segmentResponse.ok) return 0;
+          const size = (await segmentResponse.arrayBuffer()).byteLength;
+          const loadTime = performance.now() - startTime;
+          if (loadTime <= 0 || size <= 0) return 0;
+          return size / 1024 / (loadTime / 1000); // KB/s
+        } catch (error) {
+          return 0; // 任何错误都视为速度为0
+        }
+      };
+
+      const speedSamples = (await Promise.all(segmentsToTest.map(testSegment))).filter(speed => speed > 0);
+
+      if (speedSamples.length === 0) {
+        throw new Error('All segment download tests failed');
+      }
+
+      // 5. 计算最终统计数据
+      const avgSpeed = speedSamples.reduce((a, b) => a + b, 0) / speedSamples.length;
+      const finalLoadSpeed = avgSpeed >= 1024 ? `${(avgSpeed / 1024).toFixed(1)} MB/s` : `${avgSpeed.toFixed(1)} KB/s`;
+      
+      let speedJitter = 0;
+      if (speedSamples.length > 1) {
+        const mean = avgSpeed;
+        const variance = speedSamples.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) / speedSamples.length;
+        speedJitter = Math.sqrt(variance);
+      }
+
+      clearTimeout(timeout);
+      resolve({ quality, loadSpeed: finalLoadSpeed, pingTime: Math.round(pingTime), speedJitter });
+
+    } catch (error) {
+      clearTimeout(timeout);
+      reject(error);
+    }
+  });
 }
 
 export function cleanHtmlTags(text: string): string {
