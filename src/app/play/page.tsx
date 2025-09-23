@@ -1914,10 +1914,11 @@ function PlayPageClient() {
               enableWorker: true, // WebWorker 解码，降低主线程压力
               lowLatencyMode: true, // 开启低延迟 LL-HLS
 
-              /* 缓冲/内存相关 */
-              maxBufferLength: 50, // 前向缓冲最大 50s，过大容易导致高延迟
-              backBufferLength: 50, // 仅保留 50s 已播放内容，避免内存占用
-              maxBufferSize: 300 * 1000 * 1000, // 约 300MB，超出后触发清理
+              /* 缓冲/内存相关 - 极致流畅版 */
+              maxBufferLength: 80, // 前向缓冲最大 80s，过大容易导致高延迟
+              maxMaxBufferLength: 120, // 设置一个安全的最大上限，防止意外的缓冲裁剪
+              backBufferLength: 50, // 仅保留 60s 已播放内容，避免内存占用
+              maxBufferSize: 400 * 1000 * 1000, // 约 400MB，超出后触发清理
 
               /* 自定义loader */
               loader: blockAdEnabledRef.current
