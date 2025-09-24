@@ -369,7 +369,7 @@ function PlayPageClient() {
   ): number => {
     let score = 0;
 
-    // --- 1. 分辨率评分 (权重: 35%) ---
+    // --- 1. 分辨率评分 (权重: 30%) ---
     let qualityScore = (() => {
       switch (testResult.quality) {
         case '4K': return 100;
@@ -403,9 +403,9 @@ function PlayPageClient() {
         qualityScore *= 0.3; // 仅获得30%的画质分
         console.log(`  - ${testResult.quality}速度不足(${speedKBps.toFixed(0)}KB/s < ${required}KB/s)，画质分被惩罚.`);
     }
-    score += qualityScore * 0.35;
+    score += qualityScore * 0.30;
 
-    // --- 2. 下载速度评分 (权重: 35%) ---
+    // --- 2. 下载速度评分 (权重: 40%) ---
     const speedScore = (() => {
       if (speedKBps === 0) return 30; // 未知速度给一个基础分
       // S型曲线评分，在达到2.5MB/s后增长放缓
@@ -413,7 +413,7 @@ function PlayPageClient() {
       const x0 = 2500; // 2.5 MB/s
       return 100 / (1 + Math.exp(-k * (speedKBps - x0)));
     })();
-    score += speedScore * 0.35;
+    score += speedScore * 0.40;
 
     // --- 3. 网络延迟评分 (权重: 10%) ---
     const pingScore = (() => {
