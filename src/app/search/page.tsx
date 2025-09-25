@@ -185,57 +185,79 @@ const SearchPageClient: React.FC = () => {
   const fetchSearchResults = async (query: string) => {
     try {
       setIsLoading(true);
+      setSearchResults([]); // 开始新的搜索时，清空旧的结果
+
       const response = await fetch(
         `/api/search?q=${encodeURIComponent(query.trim())}`
       );
-      const data = await response.json();
-      let results = data.results;
-      
-      // 新增：确保搜索结果标题包含完整的搜索词句
-      results = results.filter((result: SearchResult) => {
-        // 将搜索词和结果标题都转换为小写进行不区分大小写的匹配
-        const lowerCaseQuery = query.trim().toLowerCase();
-        const lowerCaseTitle = result.title.toLowerCase();
-        return lowerCaseTitle.includes(lowerCaseQuery);
-      });
 
-      // 新增：过滤标题中含有“电影解说”、“剧情解说”、“预告片”、“解说”的影片
-      const filterKeywords = ['电影解说', '剧情解说', '预告片', '解说'];
-      results = results.filter(
-        (result: SearchResult) =>
-          !filterKeywords.some((keyword) => result.title.includes(keyword))
-      );
+      if (!response.body) {
+        throw new Error('Streaming not supported');
+      }
 
-      
-      setSearchResults(
-        results.sort((a: SearchResult, b: SearchResult) => {
-          // 优先排序：标题与搜索词完全一致的排在前面
-          const aExactMatch = a.title === query.trim();
-          const bExactMatch = b.title === query.trim();
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
 
-          if (aExactMatch && !bExactMatch) return -1;
-          if (!aExactMatch && bExactMatch) return 1;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
 
-          // 如果都匹配或都不匹配，则按原来的逻辑排序
-          if (a.year === b.year) {
-            return a.title.localeCompare(b.title);
-          } else {
-            // 处理 unknown 的情况
-            if (a.year === 'unknown' && b.year === 'unknown') {
-              return 0;
-            } else if (a.year === 'unknown') {
-              return 1; // a 排在后面
-            } else if (b.year === 'unknown') {
-              return -1; // b 排在后面
-            } else {
-              // 都是数字年份，按数字大小排序（大的在前面）
-              return parseInt(a.year) > parseInt(b.year) ? -1 : 1;
-            }
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+
+        // 保留最后不完整的一行
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.trim() === '') continue;
+          try {
+            const newResultsChunk: SearchResult[] = JSON.parse(line);
+
+            // 过滤和排序逻辑可以放在这里，对每个数据块进行处理
+            let filteredResults = newResultsChunk.filter((result) => {
+              const lowerCaseQuery = query.trim().toLowerCase();
+              const lowerCaseTitle = result.title.toLowerCase();
+              return lowerCaseTitle.includes(lowerCaseQuery);
+            });
+
+            const filterKeywords = ['电影解说', '剧情解说', '预告片', '解说'];
+            filteredResults = filteredResults.filter(
+              (result) =>
+                !filterKeywords.some((keyword) => result.title.includes(keyword))
+            );
+
+            // 使用函数式更新，确保状态的正确性
+            setSearchResults((prevResults) => {
+              const allResults = [...prevResults, ...filteredResults];
+              // 对合并后的所有结果进行排序
+              return allResults.sort((a, b) => {
+                const aExactMatch = a.title === query.trim();
+                const bExactMatch = b.title === query.trim();
+                if (aExactMatch && !bExactMatch) return -1;
+                if (!aExactMatch && bExactMatch) return 1;
+
+                if (a.year === b.year) {
+                  return a.title.localeCompare(b.title);
+                } else {
+                  if (a.year === 'unknown') return 1;
+                  if (b.year === 'unknown') return -1;
+                  return parseInt(b.year) - parseInt(a.year);
+                }
+              });
+            });
+          } catch (e) {
+            console.error('Error parsing streaming JSON', e);
           }
-        })
-      );
+        }
+      }
+
       setShowResults(true);
     } catch (error) {
+      console.error('Search failed:', error);
       setSearchResults([]);
     } finally {
       setIsLoading(false);

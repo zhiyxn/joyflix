@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any,no-console */
 
-import { NextResponse } from 'next/server';
-
 import { getCacheTime, getConfig } from '@/lib/config';
 import { searchFromApi } from '@/lib/downstream';
-
 
 export const runtime = 'edge';
 
@@ -13,56 +10,57 @@ export async function GET(request: Request) {
   const query = searchParams.get('q');
 
   if (!query) {
-    const cacheTime = await getCacheTime();
-    return NextResponse.json(
-      { results: [] },
-      {
-        headers: {
-          'Cache-Control': `public, max-age=${cacheTime}, s-maxage=${cacheTime}`,
-          'CDN-Cache-Control': `public, s-maxage=${cacheTime}`,
-          'Vercel-CDN-Cache-Control': `public, s-maxage=${cacheTime}`,
-          'Netlify-Vary': 'query',
-        },
-      }
-    );
+    // 如果没有查询参数，可以返回一个空的JSON或错误信息
+    return new Response(JSON.stringify({ results: [] }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   const config = await getConfig();
   const apiSites = config.SourceConfig.filter((site) => !site.disabled);
-  // 添加超时控制和错误处理，避免慢接口拖累整体响应
-  const searchPromises = apiSites.map((site) =>
-    Promise.race([
-      searchFromApi(site, query),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`${site.name} timeout`)), 20000)
-      ),
-    ]).catch((err) => {
-      console.warn(`搜索失败 ${site.name}:`, err.message);
-      return []; // 返回空数组而不是抛出错误
-    })
-  );
+  const cacheTime = await getCacheTime();
 
-  try {
-    const results = await Promise.allSettled(searchPromises);
-    const successResults = results
-      .filter((result) => result.status === 'fulfilled')
-      .map((result) => (result as PromiseFulfilledResult<any>).value);
-    let flattenedResults = successResults.flat();
-    
-    const cacheTime = await getCacheTime();
+  // 创建一个可读流
+  const stream = new ReadableStream({
+    async start(controller) {
+      const encoder = new TextEncoder();
 
-    return NextResponse.json(
-      { results: flattenedResults },
-      {
-        headers: {
-          'Cache-Control': `public, max-age=${cacheTime}, s-maxage=${cacheTime}`,
-          'CDN-Cache-Control': `public, s-maxage=${cacheTime}`,
-          'Vercel-CDN-Cache-Control': `public, s-maxage=${cacheTime}`,
-          'Netlify-Vary': 'query',
-        },
-      }
-    );
-  } catch (error) {
-    return NextResponse.json({ error: '搜索失败' }, { status: 500 });
-  }
+      const processSite = async (site: (typeof apiSites)[0]) => {
+        try {
+          const results = await Promise.race([
+            searchFromApi(site, query),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error(`${site.name} timeout`)), 20000)
+            ),
+          ]);
+
+          if (results && results.length > 0) {
+            // 将每个数据源的结果作为一个JSON对象字符串发送，并用换行符分隔
+            const chunk = encoder.encode(JSON.stringify(results) + '\n');
+            controller.enqueue(chunk);
+          }
+        } catch (err: any) {
+          console.warn(`搜索失败 ${site.name}:`, err.message);
+          // 即使某个源失败，也不中断整个流
+        }
+      };
+
+      // 并行处理所有站点
+      const allPromises = apiSites.map(processSite);
+
+      // 等待所有处理完成后关闭流
+      await Promise.all(allPromises);
+      controller.close();
+    },
+  });
+
+  // 返回流式响应
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'application/octet-stream',
+      'Cache-Control': `public, max-age=${cacheTime}, s-maxage=${cacheTime}`,
+      'CDN-Cache-Control': `public, s-maxage=${cacheTime}`,
+      'Vercel-CDN-Cache-Control': `public, s-maxage=${cacheTime}`,
+    },
+  });
 }
