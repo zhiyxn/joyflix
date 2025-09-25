@@ -184,8 +184,10 @@ const SearchPageClient: React.FC = () => {
 
   const fetchSearchResults = async (query: string) => {
     try {
+      // 立即设置加载和显示状态，清空旧结果
       setIsLoading(true);
-      setSearchResults([]); // 开始新的搜索时，清空旧的结果
+      setShowResults(true);
+      setSearchResults([]);
 
       const response = await fetch(
         `/api/search?q=${encodeURIComponent(query.trim())}`
@@ -198,6 +200,7 @@ const SearchPageClient: React.FC = () => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
+      let hasSetLoadingFalse = false; // 标记是否已关闭骨架屏
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
@@ -209,7 +212,6 @@ const SearchPageClient: React.FC = () => {
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
 
-        // 保留最后不完整的一行
         buffer = lines.pop() || '';
 
         for (const line of lines) {
@@ -217,7 +219,6 @@ const SearchPageClient: React.FC = () => {
           try {
             const newResultsChunk: SearchResult[] = JSON.parse(line);
 
-            // 过滤和排序逻辑可以放在这里，对每个数据块进行处理
             let filteredResults = newResultsChunk.filter((result) => {
               const lowerCaseQuery = query.trim().toLowerCase();
               const lowerCaseTitle = result.title.toLowerCase();
@@ -230,36 +231,41 @@ const SearchPageClient: React.FC = () => {
                 !filterKeywords.some((keyword) => result.title.includes(keyword))
             );
 
-            // 使用函数式更新，确保状态的正确性
-            setSearchResults((prevResults) => {
-              const allResults = [...prevResults, ...filteredResults];
-              // 对合并后的所有结果进行排序
-              return allResults.sort((a, b) => {
-                const aExactMatch = a.title === query.trim();
-                const bExactMatch = b.title === query.trim();
-                if (aExactMatch && !bExactMatch) return -1;
-                if (!aExactMatch && bExactMatch) return 1;
+            if (filteredResults.length > 0) {
+              // 收到第一个有效数据块后，立即关闭骨架屏
+              if (!hasSetLoadingFalse) {
+                setIsLoading(false);
+                hasSetLoadingFalse = true;
+              }
 
-                if (a.year === b.year) {
-                  return a.title.localeCompare(b.title);
-                } else {
-                  if (a.year === 'unknown') return 1;
-                  if (b.year === 'unknown') return -1;
-                  return parseInt(b.year) - parseInt(a.year);
-                }
+              setSearchResults((prevResults) => {
+                const allResults = [...prevResults, ...filteredResults];
+                return allResults.sort((a, b) => {
+                  const aExactMatch = a.title === query.trim();
+                  const bExactMatch = b.title === query.trim();
+                  if (aExactMatch && !bExactMatch) return -1;
+                  if (!aExactMatch && bExactMatch) return 1;
+
+                  if (a.year === b.year) {
+                    return a.title.localeCompare(b.title);
+                  } else {
+                    if (a.year === 'unknown') return 1;
+                    if (b.year === 'unknown') return -1;
+                    return parseInt(b.year) - parseInt(a.year);
+                  }
+                });
               });
-            });
+            }
           } catch (e) {
             console.error('Error parsing streaming JSON', e);
           }
         }
       }
-
-      setShowResults(true);
     } catch (error) {
       console.error('Search failed:', error);
       setSearchResults([]);
     } finally {
+      // 确保在流程最后（如无结果时）骨架屏也能被关闭
       setIsLoading(false);
     }
   };
