@@ -2,6 +2,7 @@
 
 import { getCacheTime, getConfig } from '@/lib/config';
 import { searchFromApi } from '@/lib/downstream';
+import { SearchResult } from '@/lib/types';
 
 export const runtime = 'edge';
 
@@ -27,9 +28,9 @@ export async function GET(request: Request) {
 
       const processSite = async (site: (typeof apiSites)[0]) => {
         try {
-          const results = await Promise.race([
+          const results: SearchResult[] = await Promise.race([
             searchFromApi(site, query),
-            new Promise((_, reject) =>
+            new Promise<never>((_, reject) =>
               setTimeout(() => reject(new Error(`${site.name} timeout`)), 20000)
             ),
           ]);
