@@ -1,7 +1,10 @@
-import { NextResponse } from 'next/server';
-import { getConfig } from '@/lib/config';
+import { NextRequest, NextResponse } from 'next/server';
+import { getCacheTime } from '@/lib/config';
+import { fetchDoubanData } from '@/lib/douban';
 
-export async function GET(request: Request) {
+export const runtime = 'edge';
+
+export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
   const start = searchParams.get('start') || '0';
@@ -14,24 +17,17 @@ export async function GET(request: Request) {
 
   const url = `https://m.douban.com/rexxar/api/v2/movie/${id}/verify_users?start=${start}&count=${count}&ck=${ck}`;
 
-  const config = await getConfig();
-  const cookie = config.douban?.cookie || '';
-
   try {
-    const response = await fetch(url, {
+    const data = await fetchDoubanData<any>(url);
+    
+    const cacheTime = await getCacheTime();
+    return NextResponse.json(data, {
       headers: {
-        'Referer': 'https://m.douban.com/',
-        'Cookie': cookie,
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
+        'Cache-Control': `public, max-age=${cacheTime}, s-maxage=${cacheTime}`,
+        'CDN-Cache-Control': `public, s-maxage=${cacheTime}`,
+        'Vercel-CDN-Cache-Control': `public, s-maxage=${cacheTime}`,
       },
     });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch from Douban: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data);
 
   } catch (error) {
     console.error('[DOUBAN DETAIL API ERROR]', error);
