@@ -30,6 +30,7 @@ const SearchPageClient: React.FC = () => {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false); // 新增：追踪流状态
   const [showResults, setShowResults] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -93,7 +94,7 @@ const SearchPageClient: React.FC = () => {
         }
       }
     });
-  }, [searchResults]);
+  }, [searchResults, searchQuery]);
 
   useEffect(() => {
     // 初始加载搜索历史
@@ -186,11 +187,12 @@ const SearchPageClient: React.FC = () => {
     try {
       // 立即设置加载和显示状态，清空旧结果
       setIsLoading(true);
+      setIsStreaming(true); // 开始流
       setShowResults(true);
       setSearchResults([]);
 
       const response = await fetch(
-        `/api/search?q=${encodeURIComponent(query.trim())}`
+        `/api/searchstream?q=${encodeURIComponent(query.trim())}`
       );
 
       if (!response.body) {
@@ -265,8 +267,9 @@ const SearchPageClient: React.FC = () => {
       console.error('Search failed:', error);
       setSearchResults([]);
     } finally {
-      // 确保在流程最后（如无结果时）骨架屏也能被关闭
+      // 确保在流程最后（如无结果时）骨架屏和流状态也能被关闭
       setIsLoading(false);
+      setIsStreaming(false);
     }
   };
 
@@ -369,12 +372,28 @@ const SearchPageClient: React.FC = () => {
         <div className="max-w-[96%] mx-auto mt-12 overflow-visible">
           {searchParams.get('q') ? (
             <section className="mb-12">
-              {/* 标题 + 聚合开关 - 总是显示 */}
+              {/* 标题 + 统计 + 加载圈 */}
               <div className="mb-8 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                  搜索结果
-                </h2>
-                
+                <div className="flex items-center gap-3">
+                  <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                    搜索结果
+                  </h2>
+                  {isStreaming && (
+                    <div
+                      className="w-5 h-5 border-2 border-gray-200 dark:border-gray-600 border-t-blue-300 rounded-full animate-spin"
+                      role="status"
+                    >
+                      <span className="sr-only">加载中...</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                  {!isLoading && aggregatedResults.length > 0 && (
+                    <span className="text-sm font-mono">
+                      ({aggregatedResults.length})
+                    </span>
+                  )}
+                </div>
               </div>
               {isLoading ? (
                 <div className="justify-start grid grid-cols-3 gap-x-2 gap-y-14 sm:gap-y-20 px-0 sm:px-2 sm:grid-cols-[repeat(auto-fill,_minmax(11rem,_1fr))] sm:gap-x-8">
@@ -431,7 +450,7 @@ const SearchPageClient: React.FC = () => {
                           />
                         </div>
                       ))}
-                  {searchResults.length === 0 && (
+                  {searchResults.length === 0 && !isStreaming && (
                     <div className="col-span-full text-center text-gray-500 py-8 dark:text-gray-400">
                       未找到相关结果
                     </div>
