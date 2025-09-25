@@ -181,7 +181,7 @@ function DoubanPageClient() {
         const calendarData = await GetBangumiCalendarData();
         const weekdayData = calendarData.find((item) => item.weekday.en === selectedWeekday);
         if (weekdayData) {
-          data = { code: 200, message: 'success', list: weekdayData.items.map((item) => ({ id: item.id?.toString() || '', title: item.name_cn || item.name, poster: item.images.large || item.images.common || '', rate: item.rating?.score?.toString() || '', year: item.air_date?.split('-')?.[0] || '' })) };
+          data = { code: 200, message: 'success', list: weekdayData.items.map((item) => ({ id: item.id?.toString() || '', title: item.name_cn || item.name, poster: item.images?.large || item.images?.common || '', rate: item.rating?.score?.toString() || '', year: item.air_date?.split('-')?.[0] || '' })) };
         } else { throw new Error('没有找到对应的日期'); }
       } else if (type === 'anime') {
         data = await getDoubanRecommends({ kind: primarySelection === '番剧' ? 'tv' : 'movie', pageLimit: 25, pageStart: 0, category: '动画', format: primarySelection === '番剧' ? '电视剧' : '', region: multiLevelValues.region as string || '', year: multiLevelValues.year as string || '', platform: multiLevelValues.platform as string || '', sort: multiLevelValues.sort as string || '', label: multiLevelValues.label as string || '' });
