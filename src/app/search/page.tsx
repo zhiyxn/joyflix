@@ -39,10 +39,6 @@ const SearchPageClient: React.FC = () => {
   >([]);
   const [isRecommendationsLoading, setIsRecommendationsLoading] = useState(true);
   
-  
-
-  const [viewMode, setViewMode] = useState<'agg' | 'all'>('agg');
-
   // 聚合后的结果（按标题和年份分组）
   const aggregatedResults = useMemo(() => {
     const map = new Map<string, SearchResult[]>();
@@ -378,22 +374,16 @@ const SearchPageClient: React.FC = () => {
                   <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">
                     搜索结果
                   </h2>
-                  {isStreaming && (
+                  {isStreaming && !isLoading && (
                     <div
-                      className="w-5 h-5 border-2 border-gray-200 dark:border-gray-600 border-t-blue-300 rounded-full animate-spin"
+                      className="w-5 h-5 border-2 border-gray-200 dark:border-gray-600 border-t-blue-400 rounded-full animate-spin"
                       role="status"
                     >
                       <span className="sr-only">加载中...</span>
                     </div>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                  {!isLoading && aggregatedResults.length > 0 && (
-                    <span className="text-sm font-mono">
-                      ({aggregatedResults.length})
-                    </span>
-                  )}
-                </div>
+
               </div>
               {isLoading ? (
                 <div className="justify-start grid grid-cols-3 gap-x-2 gap-y-14 sm:gap-y-20 px-0 sm:px-2 sm:grid-cols-[repeat(auto-fill,_minmax(11rem,_1fr))] sm:gap-x-8">
@@ -410,8 +400,7 @@ const SearchPageClient: React.FC = () => {
                   key={`search-results-${viewMode}`}
                   className="justify-start grid grid-cols-3 gap-x-2 gap-y-14 sm:gap-y-20 px-0 sm:px-2 sm:grid-cols-[repeat(auto-fill,_minmax(11rem,_1fr))] sm:gap-x-8"
                 >
-                  {viewMode === 'agg'
-                    ? aggregatedResults.map(([mapKey, group]) => {
+                  {aggregatedResults.map(([mapKey, group]) => {
                         return (
                           <div key={`agg-${mapKey}`} className="w-full">
                             <VideoCard
@@ -425,31 +414,7 @@ const SearchPageClient: React.FC = () => {
                             />
                           </div>
                         );
-                      })
-                    : searchResults.map((item) => (
-                        <div
-                          key={`all-${item.source}-${item.id}`}
-                          className="w-full"
-                        >
-                          <VideoCard
-                            id={item.id}
-                            title={item.title}
-                            poster={item.poster}
-                            episodes={item.episodes.length}
-                            source={item.source}
-                            source_name={item.source_name}
-                            douban_id={item.douban_id}
-                            query={
-                              searchQuery.trim() !== item.title
-                                ? searchQuery.trim()
-                                : ''
-                            }
-                            year={item.year}
-                            from="search"
-                            type={item.episodes.length > 1 ? 'tv' : 'movie'}
-                          />
-                        </div>
-                      ))}
+                      })}
                   {searchResults.length === 0 && !isStreaming && (
                     <div className="col-span-full text-center text-gray-500 py-8 dark:text-gray-400">
                       未找到相关结果

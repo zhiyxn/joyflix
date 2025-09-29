@@ -23,7 +23,6 @@ import { getVideoResolutionFromM3u8, processImageUrl } from '@/lib/utils';
 
 import EpisodeSelector from '@/components/EpisodeSelector';
 import PageLayout from '@/components/PageLayout';
-import { useSite } from '@/components/SiteProvider';
 
 // 扩展 HTMLVideoElement 类型以支持 hls 属性
 declare global {
@@ -51,7 +50,6 @@ interface PlaybackRateSelector {
 function PlayPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isSerialSpeedTest } = useSite();
 
   // -----------------------------------------------------------------------------
   // 状态变量（State）
@@ -275,15 +273,6 @@ function PlayPageClient() {
       }
     };
 
-    if (isSerialSpeedTest) {
-      // 串行测速逻辑
-      console.log('开始第二阶段：完整测速（串行）');
-      for (const source of survivingSources) {
-          const result = await testSource(source);
-          allResults.push(result);
-          await new Promise(resolve => setTimeout(resolve, 100)); // 两次测试之间增加一个小的延迟
-      }
-    } else {
       // 并行测速逻辑
       console.log('开始第二阶段：完整测速（并行分批）');
       const batchSize = Math.ceil(survivingSources.length / 2);
@@ -292,7 +281,6 @@ function PlayPageClient() {
           const batchResults = await Promise.all(batchSources.map(testSource));
           allResults.push(...batchResults);
       }
-    }
 
     const newVideoInfoMap = new Map<string, any>();
     allResults.forEach((result) => {
@@ -2068,11 +2056,11 @@ function PlayPageClient() {
             name: 'playback-rate',
             position: 'right',
             index: 20,
-            html: '倍数',
+            html: '<b>倍数</b>',
             selector: getPlaybackRateSelector(),
             onSelect: function(item: PlaybackRateSelector, $dom: HTMLElement){
               artPlayerRef.current.playbackRate = item.value
-              return `${item.name === '1x' ? '倍数' : item.name}`
+              return `<b>${item.name === '1x' ? '倍数' : item.name}</b>`
             }
           }
         ],

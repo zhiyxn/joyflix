@@ -20,7 +20,6 @@ import { createPortal } from 'react-dom';
 import { useTheme } from 'next-themes'; // Added
 
 import { getAuthInfoFromBrowserCookie } from '@/lib/auth';
-import { useSite } from './SiteProvider';
 
 // Reusable Components (Apple-like design)
 // =================================================================
@@ -125,7 +124,6 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
   const [doubanImageProxyType, setDoubanImageProxyType] = useState('direct');
   const [doubanImageProxyUrl, setDoubanImageProxyUrl] = useState('');
 
-  const { isSerialSpeedTest, setIsSerialSpeedTest } = useSite();
 
   const doubanDataSourceOptions = [
     { value: 'direct', label: '直连（服务器直接请求豆瓣）' },
@@ -511,31 +509,7 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
                 </label>
               </div>
 
-              {/* Parallel Speed Test Toggle */}
-              <div className='flex items-center justify-between'>
-                <div>
-                  <h4 className='font-medium text-zinc-800 dark:text-zinc-200'>启用并行测速</h4>
-                  <p className='text-xs text-zinc-500 dark:text-zinc-400 mt-1'>
-                    如遇优选路线导致应用奔溃，关闭后将启用串行测速
-                  </p>
-                </div>
-                <label className='flex items-center cursor-pointer'>
-                  <div className='relative'>
-                    <input
-                      type='checkbox'
-                      className='sr-only peer'
-                      checked={!isSerialSpeedTest}
-                      onChange={(e) => {
-                        const newIsSerialSpeedTest = !e.target.checked;
-                        setIsSerialSpeedTest(newIsSerialSpeedTest);
-                        localStorage.setItem('isSerialSpeedTest', JSON.stringify(newIsSerialSpeedTest));
-                      }}
-                    />
-                    <div className="w-11 h-6 bg-zinc-300 dark:bg-zinc-700 rounded-full peer-checked:bg-blue-400 transition-colors"></div>
-                    <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
-                  </div>
-                </label>
-              </div>
+
             </div>
           </Modal>
         </AnimatePresence>
