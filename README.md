@@ -5,17 +5,17 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Platform-Mac%20os-green?style=for-the-badge&logo=apple" alt="Platform">
+  <img src="https://img.shields.io/badge/Platform-Web%20-green?style=for-the-badge&logo=apple" alt="Platform">
   <img src="https://img.shields.io/badge/Language-next%20js-orange?style=for-the-badge&logo=next.js" alt="Language">
   <img src="https://img.shields.io/badge/VSCODE%20Ver-12+-blue?style=for-the-badge&logo=xcode" alt="Min SDK">
   <img src="https://img.shields.io/badge/License-Apache%202.0-yellow?style=for-the-badge" alt="License">
 </p>
 
-- ✨JoyFlix观影平台是一款基于 MONNTV二次开发重构的项目 （NEXT.JS） 的桌面端影视播放平台，将MOONTV的底层结构代码进行完全的重构及其优化 
+- ✨JoyFlix观影平台是一款基于 MoonTV二次开发重构的项目 （NEXT.JS） 的桌面端影视播放平台，将MoonTV的底层结构代码进行完全的重构及其优化 
 - ⚠️相对于原版进行了如下功能的添加及其重构：
 - 1️⃣ 新增详细页（使用了服务器在线爬虫，第三方API调用，从后端API搜索获取等三种不同的回退机制）
 - 2️⃣ 支持浏览滚动记录（确保进入详细页查看影片不喜欢退出上级页面可以保留滚动位置）
-- 3️⃣ 对交互逻辑的全面重构（包括桌面端与移动端，更加人性化的交互逻辑更加符合用户的交互逻辑，提升用户的使用体验）
+- 3️⃣ 对交互逻辑的全面重构（包括桌面端与移动端，更加人性化的交互逻辑更加符合用户的交互逻辑，提升用户的使用体验），播放页面集数可以按钮或悬停实现查看完整信息，对API配置页实现API有效性测试及其自动排序功能
 - 4️⃣ 对观看记录的记录逻辑进行重构
 - 5️⃣ 对收藏页面进行重构
 - 6️⃣ 对搜索页面实现热门推荐功能（具有快速获取功能，及其每次刷新），对搜索功能实现流式搜索提高响应速度提高用户的使用体验
@@ -28,10 +28,49 @@
 - 1️⃣3️⃣ 登陆页面新增记住我，查看密码功能
 - 1️⃣4️⃣ 增强广告过滤逻辑，史诗级加倍拦截广告，提升广告拦截的有效性
 - 1️⃣5️⃣ 实现滚动内容预加载功能，即提高了效率，提高用户的使用体验，实现无感加载，同时减小API的滥用
-- 1️⃣6️⃣ 还要很多功能，几乎对原有项目进行了所有的重构，欢迎审查所有代码～
+- 1️⃣6️⃣ 还要很多功能，几乎对原有项目进行了大的的重构，新增多项功能，修复若干BUG，欢迎审查所有代码～
 - ✨如需要使用Emby（Android TV端）突破高级会员限制，封装成安卓电视TV应用（安卓手机也可用，适配度可能较差），请点击[Jeffern-TV-for-Emby](https://github.com/jeffernn/JeffernTV-for-Emby-crack)
 - ✨如需使用其他端（windows）请点击[LibreTV-Mac-Python](https://github.com/jeffernn/LibreTV-Mac-Python)
 - 🎉欢迎大佬加入项目开发，有想添加/贡献/分享的影视站/Emby服务器可以在issue中/TG群与我联系
+- 
+<details>
+  <summary>点击查看项目截图</summary>
+  <img width="1680" height="920" alt="image" src="https://github.com/user-attachments/assets/5d120f71-b198-4e4f-833f-e26e349a32f3" />
+  <img width="1680" height="925" alt="image" src="https://github.com/user-attachments/assets/6ee1ae0d-9994-4c24-8961-d0a3c7b6cd5c" />
+  <img width="1680" height="926" alt="image" src="https://github.com/user-attachments/assets/d4c7b0ab-249f-4667-b418-1548cb069076" />
+  <img width="1680" height="923" alt="image" src="https://github.com/user-attachments/assets/0875d4b1-5280-4d2f-8bc8-5c1d5b65c0e3" />
+  <img width="322" height="269" alt="image" src="https://github.com/user-attachments/assets/e672b701-ed02-45e5-9235-eca9a3fb409b" />
+  <img width="628" height="510" alt="image" src="https://github.com/user-attachments/assets/7fd61d68-a370-430f-b803-11f40e95b7b8" />
+  <img width="1680" height="917" alt="image" src="https://github.com/user-attachments/assets/0e9af9a7-5e8f-4a8d-a380-6b60545dfd97" />
+  <img width="1680" height="921" alt="image" src="https://github.com/user-attachments/assets/e34a1536-9265-4523-8b80-60c5cbd4ece7" />
+  <img width="1680" height="924" alt="image" src="https://github.com/user-attachments/assets/146bbd6d-936d-4193-a6d6-1c0e2df8614d" />
+  <img width="1680" height="929" alt="image" src="https://github.com/user-attachments/assets/a0849da2-93a0-4a6e-95d4-7a06db3da8e4" />
+  <img width="1680" height="923" alt="image" src="https://github.com/user-attachments/assets/b034ba1e-e904-4844-bcd3-ed3ff15ac620" />
+  <img width="1680" height="930" alt="image" src="https://github.com/user-attachments/assets/cfc792cf-1401-4058-ba21-82455e161fa7" />
+  <img width="1680" height="875" alt="image" src="https://github.com/user-attachments/assets/f2e918c2-43f7-4d32-974a-b5aaad602ba9" />
+  <img width="1680" height="659" alt="image" src="https://github.com/user-attachments/assets/222c5621-8f69-47d0-bc21-24429a7820f3" />
+  <img width="1679" height="878" alt="image" src="https://github.com/user-attachments/assets/8d0b98ee-3dc0-4433-97ef-770303f6f54a" />
+  <img width="1680" height="881" alt="image" src="https://github.com/user-attachments/assets/6c069501-8949-444f-9b29-54b1608f9d70" />
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</details>
 
 ---
 
