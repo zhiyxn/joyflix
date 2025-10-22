@@ -10,6 +10,7 @@
   <img src="https://img.shields.io/badge/VSCODE%20Ver-12+-blue?style=for-the-badge&logo=xcode" alt="Min SDK">
   <img src="https://img.shields.io/badge/License-Apache%202.0-yellow?style=for-the-badge" alt="License">
 </p>
+
 - ⚠️ 因默认使用图片代理方式为豆瓣精品CDN，因此Api问题导致部分图片加载异常 可部署后在应用设置中将图片代理改为直链或通过环境变量修改为直链（懒得改默认了，辛苦各位手动改一下）
 - ✨JoyFlix观影平台是一款基于 MoonTV二次开发完全重构的项目 （NEXT.JS） 的影视播放平台，将MoonTV的底层结构代码进行完全的重构及其优化对UI及其交互逻辑进行完全重构
 - ⚠️相对于原版进行了如下功能的添加及其重构（仅列举部分）：
