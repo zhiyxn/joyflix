@@ -33,6 +33,8 @@
 - ✨如需使用其他端（windows）请点击[LibreTV-Mac-Python](https://github.com/jeffernn/LibreTV-Mac-Python)
 - 🎉欢迎大佬加入项目开发，有想添加/贡献/分享的影视站/Emby服务器可以在issue中/TG群与我联系
 
+---
+
 ## 技术栈
 
 | 分类      | 主要依赖                                                                                              |
