@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/License-Apache%202.0-yellow?style=for-the-badge" alt="License">
 </p>
 
-- ✨JoyFLix观影平台是一款基于 MONNTV二次开发重构的项目 （NEXT.JS） 的桌面端影视播放平台，将MOONTV的底层结构代码进行完全的重构及其优化 
+- ✨JoyFlix观影平台是一款基于 MONNTV二次开发重构的项目 （NEXT.JS） 的桌面端影视播放平台，将MOONTV的底层结构代码进行完全的重构及其优化 
 - ⚠️相对于原版进行了如下功能的添加及其重构：
 - 1️⃣ 新增详细页（使用了服务器在线爬虫，第三方API调用，从后端API搜索获取等三种不同的回退机制）
 - 2️⃣ 支持浏览滚动记录（确保进入详细页查看影片不喜欢退出上级页面可以保留滚动位置）
