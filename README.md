@@ -32,7 +32,7 @@
 - ✨如需要使用Emby（Android TV端）突破高级会员限制，封装成安卓电视TV应用（安卓手机也可用，适配度可能较差），请点击[Jeffern-TV-for-Emby](https://github.com/jeffernn/JeffernTV-for-Emby-crack)
 - ✨如需使用其他端（windows）请点击[LibreTV-Mac-Python](https://github.com/jeffernn/LibreTV-Mac-Python)
 - 🎉欢迎大佬加入项目开发，有想添加/贡献/分享的影视站/Emby服务器可以在issue中/TG群与我联系
-- 
+
 <details>
   <summary>点击查看项目截图</summary>
   <img width="1680" height="920" alt="image" src="https://github.com/user-attachments/assets/5d120f71-b198-4e4f-833f-e26e349a32f3" />
@@ -51,24 +51,8 @@
   <img width="1680" height="659" alt="image" src="https://github.com/user-attachments/assets/222c5621-8f69-47d0-bc21-24429a7820f3" />
   <img width="1679" height="878" alt="image" src="https://github.com/user-attachments/assets/8d0b98ee-3dc0-4433-97ef-770303f6f54a" />
   <img width="1680" height="881" alt="image" src="https://github.com/user-attachments/assets/6c069501-8949-444f-9b29-54b1608f9d70" />
-  
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  <img width="1680" height="926" alt="image" src="https://github.com/user-attachments/assets/cbac7ff6-be4c-4eef-a77b-2271c83d054d" />
+  <img width="590" height="1278" alt="IMG_0120" src="https://github.com/user-attachments/assets/bfc1c2b1-933f-4745-959d-3a1e4dbc12f8" />
 
 </details>
 
