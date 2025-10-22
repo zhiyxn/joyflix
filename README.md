@@ -1,3 +1,38 @@
+---
+## 🎬  JoyFlix观影平台（基于NEXT.JS）
+<p align="center">
+  <img src="https://github.com/jeffernn/LibreTV-MoonTV-Mac-Objective-C/blob/main/img/icon.png?raw=true" alt="JeffernTV Logo" width="120" height="120">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Platform-Mac%20os-green?style=for-the-badge&logo=apple" alt="Platform">
+  <img src="https://img.shields.io/badge/Language-next%20js-orange?style=for-the-badge&logo=next.js" alt="Language">
+  <img src="https://img.shields.io/badge/VSCODE%20Ver-12+-blue?style=for-the-badge&logo=xcode" alt="Min SDK">
+  <img src="https://img.shields.io/badge/License-Apache%202.0-yellow?style=for-the-badge" alt="License">
+</p>
+
+- ✨JoyFLix观影平台是一款基于 MONNTV二次开发重构的项目 （NEXT.JS） 的桌面端影视播放平台，将MOONTV的底层结构代码进行完全的重构及其优化 
+- ⚠️相对于原版进行了如下功能的添加及其重构：
+- 1️⃣ 新增详细页（使用了服务器在线爬虫，第三方API调用，从后端API搜索获取等三种不同的回退机制）
+- 2️⃣ 支持浏览滚动记录（确保进入详细页查看影片不喜欢退出上级页面可以保留滚动位置）
+- 3️⃣ 对交互逻辑的全面重构（包括桌面端与移动端，更加人性化的交互逻辑更加符合用户的交互逻辑，提升用户的使用体验）
+- 4️⃣ 对观看记录的记录逻辑进行重构
+- 5️⃣ 对收藏页面进行重构
+- 6️⃣ 对搜索页面实现热门推荐功能（具有快速获取功能，及其每次刷新），对搜索功能实现流式搜索提高响应速度提高用户的使用体验
+- 7️⃣ 对加载页面进行响应的优化，减少加载枯燥感
+- 8️⃣ 对低端设备实现串行搜索功能，降低网站奔溃的可能性
+- 9️⃣ 修复内存泄漏问题，提高稳定性
+- 🔟 移除无用功能，减少冗余度，提高网站响应速度
+- 1️⃣1️⃣ 对移动端和桌面端进行不同的优化逻辑，实现不同的交互逻辑
+- 1️⃣2️⃣ 对UI实现史诗级更新，加入动效等 提高用户使用体验
+- 1️⃣3️⃣ 登陆页面新增记住我，查看密码功能
+- 1️⃣4️⃣ 增强广告过滤逻辑，史诗级加倍拦截广告，提升广告拦截的有效性
+- 1️⃣5️⃣ 实现滚动内容预加载功能，即提高了效率，提高用户的使用体验，实现无感加载，同时减小API的滥用
+- 1️⃣6️⃣ 还要很多功能，几乎对原有项目进行了所有的重构，欢迎审查所有代码～
+- ✨如需要使用Emby（Android TV端）突破高级会员限制，封装成安卓电视TV应用（安卓手机也可用，适配度可能较差），请点击[Jeffern-TV-for-Emby](https://github.com/jeffernn/JeffernTV-for-Emby-crack)
+- ✨如需使用其他端（windows）请点击[LibreTV-Mac-Python](https://github.com/jeffernn/LibreTV-Mac-Python)
+- 🎉欢迎大佬加入项目开发，有想添加/贡献/分享的影视站/Emby服务器可以在issue中/TG群与我联系
+
 ## 技术栈
 
 | 分类      | 主要依赖                                                                                              |
@@ -203,4 +238,56 @@ custom_category 支持的自定义分类如下：
 - [ts-nextjs-tailwind-starter](https://github.com/theodorusclarence/ts-nextjs-tailwind-starter) — 脚手架。
 - [ArtPlayer](https://github.com/zhw2590582/ArtPlayer) — 网页视频播放器。
 - [HLS.js](https://github.com/video-dev/hls.js) — 实现 HLS 流媒体在浏览器中的播放支持。
+
+---
+
+### ✨✨✨福利
+
+- 啦啦～
+- 看到这里啦！说明你认真熟读了README，我必须送你一些专属福利～
+- ⬇️⬇️Emby客户端（macos/ipados/ios）高级订阅会员破解脚本⬇️⬇️
+- https://github.com/jeffernn/jeffern-qx/blob/main/%E9%87%8D%E5%86%99/Embypremiere/Embypremiere.conf
+- 配合Quantumult x使用，懂得都懂！切勿外传哦～
+
+---
+
+### 🚨 重要声明
+
+- 本项目仅供学习和个人使用
+- 请勿用于商业用途或公开服务（**禁止用于任何商业用途**）
+- 如因公开分享导致的任何法律问题，用户需自行承担责任
+- 项目开发者不对用户的使用行为承担任何法律责任
+- 如有问题或建议，欢迎提交 Issue
+- 如需分支项目请引用本项目地址
+- 如需要将Emby突破高级会员限制，封装成安卓电视TV，请点击[Jeffern-TV-for-Emby](https://github.com/jeffernn/JeffernTV-for-Emby-crack)
+- 其他端（windows）的部署可参考[LibreTV-Mac-Python](https://github.com/jeffernn/LibreTV-Mac-Python)版本进行修改后自行打包
+
+
+---
+
+## ⚠️ 免责声明
+
+JoyFlix 仅作为视频搜索工具，不存储、上传或分发任何视频内容。所有视频均来自第三方影视站提供的搜索结果。如有侵权内容，请联系相应的内容提供方。
+
+本项目开发者不对使用本项目产生的任何后果负责。使用本项目时，您必须遵守当地的法律法规。
+
+---
+
+## 🚀 欢迎加入我们的 Telegram 社区！
+
+[![加入 Telegram](https://img.shields.io/badge/Telegram-加入我们的社区-blue?logo=telegram&style=for-the-badge)](https://t.me/+vIMxDGDIWiczMTE1)
+
+欢迎加入我们的 Telegram 群，获取最新动态、分享创意、与志同道合的朋友交流！🌟
+
+---
+
+## 🌟 Star History
+
+[![Stargazers over time](https://starchart.cc/jeffernn/LibreTV-MoonTV-Mac-Objective-C.svg?variant=adaptive)](https://starchart.cc/jeffernn/LibreTV-MoonTV-Mac-Objective-C)
+
+---
+
+<p align="center">
+  <b>⭐ 如果这个项目对你有帮助，请给个 Star 支持一下！</b>
+</p>
 
