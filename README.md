@@ -135,8 +135,8 @@
 ```yaml
 services:
   moontv-core:
-    image: ghcr.io/lunatechlab/moontv:latest
-    container_name: moontv-core
+    image: ghcr.io/lunatechlab/joyflix:latest
+    container_name: joyflix-core
     restart: unless-stopped
     ports:
       - '3000:3000'
@@ -144,25 +144,25 @@ services:
       - USERNAME=admin
       - PASSWORD=admin_password
       - NEXT_PUBLIC_STORAGE_TYPE=redis
-      - REDIS_URL=redis://moontv-redis:6379
+      - REDIS_URL=redis://joyflix-redis:6379
     networks:
-      - moontv-network
+      - joyflix-network
     depends_on:
-      - moontv-redis
+      - joyflix-redis
     # 如需自定义配置，可挂载文件
     # volumes:
     #   - ./config.json:/app/config.json:ro
   moontv-redis:
     image: redis:alpine
-    container_name: moontv-redis
+    container_name: joyflix-redis
     restart: unless-stopped
     networks:
-      - moontv-network
+      - joyflix-network
     # 如需持久化
     # volumes:
     #   - ./data:/data
 networks:
-  moontv-network:
+  joyflix-network:
     driver: bridge
 ```
 
