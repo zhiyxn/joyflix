@@ -11,8 +11,8 @@
   <img src="https://img.shields.io/badge/License-Apache%202.0-yellow?style=for-the-badge" alt="License">
 </p>
 
-- ✨JoyFlix观影平台是一款基于 MoonTV二次开发重构的项目 （NEXT.JS） 的桌面端影视播放平台，将MoonTV的底层结构代码进行完全的重构及其优化 
-- ⚠️相对于原版进行了如下功能的添加及其重构：
+- ✨JoyFlix观影平台是一款基于 MoonTV二次开发完全重构的项目 （NEXT.JS） 的影视播放平台，将MoonTV的底层结构代码进行完全的重构及其优化 
+- ⚠️相对于原版进行了如下功能的添加及其重构（仅列举部分）：
 - 1️⃣ 新增详细页（使用了服务器在线爬虫，第三方API调用，从后端API搜索获取等三种不同的回退机制）
 - 2️⃣ 支持浏览滚动记录（确保进入详细页查看影片不喜欢退出上级页面可以保留滚动位置）
 - 3️⃣ 对交互逻辑的全面重构（包括桌面端与移动端，更加人性化的交互逻辑更加符合用户的交互逻辑，提升用户的使用体验），播放页面集数可以按钮或悬停实现查看完整信息，对API配置页实现API有效性测试及其自动排序功能
@@ -29,8 +29,6 @@
 - 1️⃣4️⃣ 增强广告过滤逻辑，史诗级加倍拦截广告，提升广告拦截的有效性
 - 1️⃣5️⃣ 实现滚动内容预加载功能，即提高了效率，提高用户的使用体验，实现无感加载，同时减小API的滥用
 - 1️⃣6️⃣ 还要很多功能，几乎对原有项目进行了大的的重构，新增多项功能，修复若干BUG，欢迎审查所有代码～
-- ✨如需要使用Emby（Android TV端）突破高级会员限制，封装成安卓电视TV应用（安卓手机也可用，适配度可能较差），请点击[Jeffern-TV-for-Emby](https://github.com/jeffernn/JeffernTV-for-Emby-crack)
-- ✨如需使用其他端（windows）请点击[LibreTV-Mac-Python](https://github.com/jeffernn/LibreTV-Mac-Python)
 - 🎉欢迎大佬加入项目开发，有想添加/贡献/分享的影视站/Emby服务器可以在issue中/TG群与我联系
 
 <details>
@@ -185,7 +183,8 @@ networks:
 | NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE | 豆瓣图片代理类型                             | 见下方                           | direct                                                                                                                     |
 | NEXT_PUBLIC_DOUBAN_IMAGE_PROXY      | 自定义豆瓣图片代理 URL                       | url prefix                       | (空)                                                                                                                       |
 
-| NEXT_PUBLIC_BASE_URL                | 搜索推荐数据库获取值接口URL                     | https://xxx.com                             | 空    
+| NEXT_PUBLIC_BASE_URL                | 搜索推荐数据库获取值接口URL                     | https://xxx.com                 | 空    
+            |
                         
 NEXT_PUBLIC_DOUBAN_PROXY_TYPE 选项解释：
 
@@ -284,8 +283,7 @@ custom_category 支持的自定义分类如下：
 - 项目开发者不对用户的使用行为承担任何法律责任
 - 如有问题或建议，欢迎提交 Issue
 - 如需分支项目请引用本项目地址
-- 如需要将Emby突破高级会员限制，封装成安卓电视TV，请点击[Jeffern-TV-for-Emby](https://github.com/jeffernn/JeffernTV-for-Emby-crack)
-- 其他端（windows）的部署可参考[LibreTV-Mac-Python](https://github.com/jeffernn/LibreTV-Mac-Python)版本进行修改后自行打包
+- 二次开发许遵守开源协议并引用本项目地址
 
 
 ---
