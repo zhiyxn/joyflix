@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/License-Apache%202.0-yellow?style=for-the-badge" alt="License">
 </p>
 
-- ✨JoyFlix观影平台是一款基于 MoonTV二次开发完全重构的项目 （NEXT.JS） 的影视播放平台，将MoonTV的底层结构代码进行完全的重构及其优化 
+- ✨JoyFlix观影平台是一款基于 MoonTV二次开发完全重构的项目 （NEXT.JS） 的影视播放平台，将MoonTV的底层结构代码进行完全的重构及其优化对UI及其交互逻辑进行完全重构
 - ⚠️相对于原版进行了如下功能的添加及其重构（仅列举部分）：
 - 1️⃣ 新增详细页（使用了服务器在线爬虫，第三方API调用，从后端API搜索获取等三种不同的回退机制）
 - 2️⃣ 支持浏览滚动记录（确保进入详细页查看影片不喜欢退出上级页面可以保留滚动位置）
@@ -132,8 +132,8 @@
 
 ```yaml
 services:
-  moontv-core:
-    image: ghcr.io/lunatechlab/joyflix:latest
+  joyflix-core:
+    image: ghcr.io/jeffernn/joyflix@sha256:453fd835de93538a880dce307680da0f20d805c575c6ddfe09557f7018a2a877
     container_name: joyflix-core
     restart: unless-stopped
     ports:
@@ -150,7 +150,7 @@ services:
     # 如需自定义配置，可挂载文件
     # volumes:
     #   - ./config.json:/app/config.json:ro
-  moontv-redis:
+  joyflix-redis:
     image: redis:alpine
     container_name: joyflix-redis
     restart: unless-stopped
