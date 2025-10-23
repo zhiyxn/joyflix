@@ -129,6 +129,23 @@
 4. 设置环境变量 NEXT_PUBLIC_STORAGE_TYPE，值为 **upstash**；设置 USERNAME 和 PASSWORD 作为超管账号
 5. 重试部署
 
+### 爪云部署
+
+#### 普通部署（localstorage）
+
+1. Image  Name 填写 ghcr.io/jeffernn/joyflix@sha256:453fd835de93538a880dce307680da0f20d805c575c6ddfe09557f7018a2a877
+2. 根据以下环境变量要求填写环境变量
+
+部署完成后即可通过分配的域名访问，也可以绑定自定义域名。
+
+#### Upstash Redis 支持
+
+0. 爪云环境变量处要填写。
+1. 在 [upstash](https://upstash.com/) 注册账号并新建一个 Redis 实例，名称任意。
+2. 复制新数据库的 **HTTPS ENDPOINT 和 TOKEN**
+3. 返回你的 Vercel 项目，新增环境变量 **UPSTASH_URL 和 UPSTASH_TOKEN**，值为第二步复制的 endpoint 和 token
+4. 设置环境变量 NEXT_PUBLIC_STORAGE_TYPE，值为 **upstash**；设置 USERNAME 和 PASSWORD 作为超管账号
+
 
 ### Docker 部署
 
