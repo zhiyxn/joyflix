@@ -186,9 +186,12 @@ networks:
 | NEXT_PUBLIC_DOUBAN_PROXY            | 自定义豆瓣数据代理 URL                       | url prefix                       | (空)                                                                                                                       |
 | NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE | 豆瓣图片代理类型                             | 见下方                           | direct                                                                                                                     |
 | NEXT_PUBLIC_DOUBAN_IMAGE_PROXY      | 自定义豆瓣图片代理 URL                       | url prefix                       | (空)                                                                                                                       |
-
 | NEXT_PUBLIC_BASE_URL                | 搜索推荐数据库获取值接口URL                     | https://xxx.com                 | 空    
                                                                                                  |
+
+
+
+                                                                                                 
                         
 NEXT_PUBLIC_DOUBAN_PROXY_TYPE 选项解释：
 
