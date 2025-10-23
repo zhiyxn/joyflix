@@ -315,6 +315,7 @@ JoyFlix 仅作为视频搜索工具，不存储、上传或分发任何视频内
 
 [![Stargazers over time](https://starchart.cc/jeffernn/joyflix.svg?variant=adaptive)](https://starchart.cc/jeffernn/joyflix)
 
+
 ---
 
 <p align="center">
