@@ -4,36 +4,40 @@
   <img src="https://github.com/jeffernn/LibreTV-MoonTV-Mac-Objective-C/blob/main/img/icon.png?raw=true" alt="JeffernTV Logo" width="120" height="120">
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Platform-Web%20-green?style=for-the-badge&logo=apple" alt="Platform">
-  <img src="https://img.shields.io/badge/Language-next%20js-orange?style=for-the-badge&logo=next.js" alt="Language">
-  <img src="https://img.shields.io/badge/VSCODE%20Ver-12+-blue?style=for-the-badge&logo=xcode" alt="Min SDK">
-  <img src="https://img.shields.io/badge/License-Apache%202.0-yellow?style=for-the-badge" alt="License">
-</p>
+> 🎬 JoyFlix观影平台是一款基于 MoonTV二次开发完全重构（包括底层后端及其前端UI及其交互逻辑）的影视播放平台
 
-- ⚠️ 因默认使用图片代理方式为豆瓣精品CDN，因此Api问题导致部分图片加载异常 可部署后在应用设置中将图片代理改为直链或通过环境变量修改为直链（懒得改默认了，辛苦各位手动改一下）
-- ✨JoyFlix观影平台是一款基于 MoonTV二次开发完全重构的项目 （NEXT.JS） 的影视播放平台，将MoonTV的底层结构代码进行完全的重构及其优化对UI及其交互逻辑进行完全重构
+<div align="center">
+
+![Next.js](https://img.shields.io/badge/Next.js-14-000?logo=nextdotjs)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3-38bdf8?logo=tailwindcss)
+![TypeScript](https://img.shields.io/badge/TypeScript-4.x-3178c6?logo=typescript)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Docker Ready](https://img.shields.io/badge/Docker-ready-blue?logo=docker)
+
+</div>
+
+- ⚠️ 因默认使用图片代理方式为豆瓣精品CDN，因此Api获取问题导致部分图片加载异常，可部署后在应用设置中将图片代理改为直连或部署时通过环境变量修改为直连即可恢复正常（懒得改默认了，辛苦各位手动改一下）
 - ⚠️相对于原版进行了如下功能的添加及其重构（仅列举部分）：
-- 1️⃣ 新增详细页（使用了服务器在线爬虫，第三方API调用，从后端API搜索获取等三种不同的回退机制）
-- 2️⃣ 支持浏览滚动记录（确保进入详细页查看影片不喜欢退出上级页面可以保留滚动位置）
-- 3️⃣ 对交互逻辑的全面重构（包括桌面端与移动端，更加人性化的交互逻辑更加符合用户的交互逻辑，提升用户的使用体验），播放页面集数可以按钮或悬停实现查看完整信息，对API配置页实现API有效性测试及其自动排序功能
+- 1️⃣ 新增详细页（使用了服务器在线爬虫技术，第三方API调用，从后端API搜索获取等三种不同的回退机制确保数据获取的稳定性）
+- 2️⃣ 支持浏览滚动记录（确保进入详细页查看影片不喜欢退出上级页面不会丢失浏览记录，可以回到之前的滚动位置）
+- 3️⃣ 对交互逻辑、后端代码及其UI的全面重构（包括桌面端与移动端，更加人性化的交互逻辑更加符合用户的交互逻辑，提升用户的使用体验），播放页面集数可以按钮或悬停实现查看完整信息（避免综艺长标题影响选集功能），对站点API配置页实现API有效性测试及其自动排序功能（）
 - 4️⃣ 对观看记录的记录逻辑进行重构
 - 5️⃣ 对收藏页面进行重构
-- 6️⃣ 对搜索页面实现热门推荐功能（具有快速获取功能，及其每次刷新），对搜索功能实现流式搜索提高响应速度提高用户的使用体验
-- 7️⃣ 对加载页面进行响应的优化，减少加载枯燥感
-- 8️⃣ 对低端设备实现串行搜索功能，降低网站奔溃的可能性
+- 6️⃣ 对搜索页面实现热门推荐功能（具有结合数据库热更新快速获取推荐内容的功能，及其每次加载的实时性推荐），对搜索功能实现流式搜索提高响应速度提高用户的使用体验，对搜索结果的排序顺序进行重构，聚合逻辑重构（提高用户的使用体验）
+- 7️⃣ 对加载页面进行响应的优化（增加加载的速度及其加载趣味性）
+- 8️⃣ 对优选路线评分机制逻辑进行完全的增强重构，确保优选路线的有效性播放，加强优选的科学性，有效性，及其优选速度
 - 9️⃣ 修复内存泄漏问题，提高稳定性
-- 🔟 移除无用功能，减少冗余度，提高网站响应速度
-- 1️⃣1️⃣ 对移动端和桌面端进行不同的优化逻辑，实现不同的交互逻辑
-- 1️⃣2️⃣ 对UI实现史诗级更新，加入动效等 提高用户使用体验
+- 🔟 移除各项无用冗余功能（减少冗余度，提高网站响应速度，布局合理简洁易用）
+- 1️⃣1️⃣ 对移动端和桌面端进行针对性的多端优化，符合不同设备相应的最佳科学的交互逻辑
+- 1️⃣2️⃣ 对UI、布局进行重构，加入动态效果
 - 1️⃣3️⃣ 登陆页面新增记住我，查看密码功能
 - 1️⃣4️⃣ 增强广告过滤逻辑，史诗级加倍拦截广告，提升广告拦截的有效性
-- 1️⃣5️⃣ 实现滚动内容预加载功能，即提高了效率，提高用户的使用体验，实现无感加载，同时减小API的滥用
-- 1️⃣6️⃣ 还要很多功能，几乎对原有项目进行了大的的重构，新增多项功能，修复若干BUG，欢迎审查所有代码～
-- 🎉欢迎大佬加入项目开发，有想添加/贡献/分享的影视站/Emby服务器可以在issue中/TG群与我联系
+- 1️⃣5️⃣ 实现影片内容预加载功能，提高了加载效率，提高用户的使用体验，实现无感加载，减少加载的延迟感，同时减小API的滥用
+- 1️⃣6️⃣ 还有更多，欢迎部署体验感受其不同，几乎对原有项目进行了手术级别的重构，新增多项功能，修复若干BUG，欢迎审查所有代码～
+- 🎉欢迎大佬加入项目开发，有想贡献的佬佬们可以在issue中/TG群与我联系
 
 <details>
-  <summary>点击查看项目截图</summary>
+  <summary>点击查看项目图</summary>
   <img width="1680" height="920" alt="image" src="https://github.com/user-attachments/assets/5d120f71-b198-4e4f-833f-e26e349a32f3" />
   <img width="1680" height="925" alt="image" src="https://github.com/user-attachments/assets/6ee1ae0d-9994-4c24-8961-d0a3c7b6cd5c" />
   <img width="1680" height="926" alt="image" src="https://github.com/user-attachments/assets/d4c7b0ab-249f-4667-b418-1548cb069076" />
@@ -52,7 +56,6 @@
   <img width="1680" height="881" alt="image" src="https://github.com/user-attachments/assets/6c069501-8949-444f-9b29-54b1608f9d70" />
   <img width="1680" height="926" alt="image" src="https://github.com/user-attachments/assets/cbac7ff6-be4c-4eef-a77b-2271c83d054d" />
   <img width="590" height="1278" alt="IMG_0120" src="https://github.com/user-attachments/assets/bfc1c2b1-933f-4745-959d-3a1e4dbc12f8" />
-
 </details>
 
 ---
@@ -65,7 +68,7 @@
 | UI & 样式 | [Tailwind&nbsp;CSS 3](https://tailwindcss.com/)                                                       |
 | 语言      | TypeScript 4                                                                                          |
 | 播放器    | [ArtPlayer](https://github.com/zhw2590582/ArtPlayer) · [HLS.js](https://github.com/video-dev/hls.js/) |
-| 部署      | Docker · Vercel · CloudFlare pages                                                                    |
+| 部署      | Docker · Vercel                                                                                |
 
 ## 部署
 
@@ -185,7 +188,7 @@ networks:
 | NEXT_PUBLIC_DOUBAN_IMAGE_PROXY      | 自定义豆瓣图片代理 URL                       | url prefix                       | (空)                                                                                                                       |
 
 | NEXT_PUBLIC_BASE_URL                | 搜索推荐数据库获取值接口URL                     | https://xxx.com                 | 空    
-            |
+    
                         
 NEXT_PUBLIC_DOUBAN_PROXY_TYPE 选项解释：
 
