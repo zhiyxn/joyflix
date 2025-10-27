@@ -1,0 +1,107 @@
+name: Build and Push Multi-Architecture Docker Images
+
+on:
+  push:
+    branches: [ main, feature ]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - 'Dockerfile'
+  pull_request:
+    workflow_dispatch:
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: lkzyxn/joyflix
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Expose GitHub Runtime
+        uses: crazy-max/ghaction-generate-runtime@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-amd64
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-amd64-${{ github.sha }}
+          cache-from: type=gha,mode=max
+          cache-to: type=gha,mode=max
+          labels: |
+            org.opencontainers.image.title=JoyFlix
+            org.opencontainers.image.description=基于 Next.js 14 的影视聚合播放平台
+            org.opencontainers.image.version=latest
+            org.opencontainers.image.architecture=amd64
+            org.opencontainers.image.vendor=lkzyxn
+
+      - name: Build and push ARM64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-arm64
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-arm64-${{ github.sha }}
+          cache-from: type=gha,mode=max
+          cache-to: type=gha,mode=max
+          labels: |
+            org.opencontainers.image.title=JoyFlix
+            org.opencontainers.image.description=基于 Next.js 14 的影视聚合播放平台
+            org.opencontainers.image.version=latest
+            org.opencontainers.image.architecture=arm64
+            org.opencontainers.image.vendor=lkzyxn
+
+      - name: Create and push multi-platform manifests
+        run: |
+          # Create latest manifest
+          docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-amd64 \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-arm64
+          docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+          # Create sha-specific manifest for reproducible builds
+          docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-amd64-${{ github.sha }} \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-arm64-${{ github.sha }}
+          docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+
+          echo "✅ 多平台 manifest 创建并推送完成！"
+          echo "🚀 镜像 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest 现在支持 AMD64 和 ARM64"
+          echo "🔗 Docker Hub: https://hub.docker.com/r/${{ env.IMAGE_NAME }}"
+
+  deploy-notification:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Send deployment notification
+        run: |
+          echo "🎯 JoyFlix Docker 镜像构建完成"
+          echo "📊 构建状态: ${{ job.build-and-push.result }}"
+          echo "🏗️ 支持架构: AMD64, ARM64"
+          echo "📦 Docker Hub: https://hub.docker.com/r/${{ env.IMAGE_NAME }}"
