@@ -8,7 +8,8 @@ on:
       - '.gitignore'
       - 'Dockerfile'
   pull_request:
-    workflow_dispatch:
+    branches: [ main ]
+  workflow_dispatch:
 
 env:
   REGISTRY: docker.io
@@ -98,6 +99,6 @@ jobs:
       - name: Send deployment notification
         run: |
           echo "🎯 JoyFlix Docker 镜像构建完成"
-          echo "📊 构建状态: ${{ job.build-and-push.result }}"
+          echo "📊 构建状态: ${{ needs.build-and-push.result }}"
           echo "🏗️ 支持架构: AMD64, ARM64"
           echo "📦 Docker Hub: https://hub.docker.com/r/${{ env.IMAGE_NAME }}"
