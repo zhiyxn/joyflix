@@ -25,7 +25,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/joyflix
+          images: ${{ secrets.DOCKER_USERNAME }}/joyflix
 
       # 2. 设置 QEMU，这是为了让 Runner 能模拟 ARM 架构
       - name: Set up QEMU
@@ -39,8 +39,8 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       # 5. (核心) 一次性构建和推送所有平台
       # 注意这里的 'platforms' 参数
