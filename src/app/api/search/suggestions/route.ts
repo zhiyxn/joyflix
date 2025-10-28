@@ -8,6 +8,10 @@ import { searchFromApi } from '@/lib/downstream';
 
 export const runtime = 'edge';
 
+// ⬇️ 修复：添加这一行
+// 明确告诉 Next.js 这是一个动态路由，因为它需要读取 Cookie
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // 从 cookie 获取用户信息
