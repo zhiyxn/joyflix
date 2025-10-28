@@ -1,104 +1,57 @@
-name: Build and Push Multi-Architecture Docker Images
+name: Docker Multi-Platform
 
 on:
   push:
-    branches: [ main, feature ]
-    paths-ignore:
-      - '**.md'
-      - '.gitignore'
-      - 'Dockerfile'
+    branches:
+      - "main" # 仅在 main 分支推送时触发
+    tags:
+      - "v*" # 仅在推送 v 开头的 tag 时触发
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
-
-env:
-  REGISTRY: docker.io
-  IMAGE_NAME: lkzyxn/joyflix
+    branches:
+      - "main" # 在向 main 提交 PR 时触发
 
 jobs:
-  build-and-push:
+  docker:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
+      # 1. (推荐) 自动获取镜像的元数据，如标签和描述
+      # 这会根据 Git 事件（如 tag, main分支）自动生成聪明的 Docker 标签
+      # 例如：type=semver,pattern={{version}} 会自动使用 v1.2.3 这样的 Git 标签
+      #       type=sha 会生成基于 commit sha 的标签
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/joyflix
+
+      # 2. 设置 QEMU，这是为了让 Runner 能模拟 ARM 架构
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # 3. 设置 Docker Buildx，这是 Docker 的下一代构建工具
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      
+      # 4. 登录到 Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push AMD64 image
+      # 5. (核心) 一次性构建和推送所有平台
+      # 注意这里的 'platforms' 参数
+      - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-amd64
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-amd64-${{ github.sha }}
-          cache-from: type=gha,mode=max
-          cache-to: type=gha,mode=max
-          labels: |
-            org.opencontainers.image.title=JoyFlix
-            org.opencontainers.image.description=基于 Next.js 14 的影视聚合播放平台
-            org.opencontainers.image.version=latest
-            org.opencontainers.image.architecture=amd64
-            org.opencontainers.image.vendor=lkzyxn
-
-      - name: Build and push ARM64 image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          platforms: linux/arm64
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-arm64
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-arm64-${{ github.sha }}
-          cache-from: type=gha,mode=max
-          cache-to: type=gha,mode=max
-          labels: |
-            org.opencontainers.image.title=JoyFlix
-            org.opencontainers.image.description=基于 Next.js 14 的影视聚合播放平台
-            org.opencontainers.image.version=latest
-            org.opencontainers.image.architecture=arm64
-            org.opencontainers.image.vendor=lkzyxn
-
-      - name: Create and push multi-platform manifests
-        run: |
-          # Create latest manifest
-          docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-amd64 \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-arm64
-          docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-
-          # Create sha-specific manifest for reproducible builds
-          docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-amd64-${{ github.sha }} \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-arm64-${{ github.sha }}
-          docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-
-          echo "✅ 多平台 manifest 创建并推送完成！"
-          echo "🚀 镜像 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest 现在支持 AMD64 和 ARM64"
-          echo "🔗 Docker Hub: https://hub.docker.com/r/${{ env.IMAGE_NAME }}"
-
-  deploy-notification:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Send deployment notification
-        run: |
-          echo "🎯 JoyFlix Docker 镜像构建完成"
-          echo "📊 构建状态: ${{ needs.build-and-push.result }}"
-          echo "🏗️ 支持架构: AMD64, ARM64"
-          echo "📦 Docker Hub: https://hub.docker.com/r/${{ env.IMAGE_NAME }}"
+          # 这一行是关键：同时指定 amd64 和 arm64
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }} # 仅在非 PR 事件时才真正推送
+          tags: ${{ steps.meta.outputs.tags }} # 使用第1步生成的标签
+          labels: ${{ steps.meta.outputs.labels }} # 使用第1步生成的标签
+          cache-from: type=gha # 启用 GitHub Actions 的构建缓存
+          cache-to: type=gha,mode=max # 将缓存写回
